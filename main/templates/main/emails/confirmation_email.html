@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de réception de votre message</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .header h1 {
+            color: #8B4513;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #777;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #D86B1E;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #B85C1A;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Merci pour votre message !</h1>
+        </div>
+        <div class="content">
+            <p>Bonjour {{ nom }},</p>
+            <p>Nous avons bien reçu votre message et vous en remercions.</p>
+            <p>Voici un récapitulatif de votre message :</p>
+            <blockquote style="background-color: #f9f9f9; padding: 10px; border-left: 5px solid #8B4513; margin: 20px 0;">
+                {{ message }}
+            </blockquote>
+            <p>Nous vous répondrons dans les plus brefs délais.</p>
+            <p>Cordialement,</p>
+            <p>L'équipe de {{ boulangerie.nom }}</p>
+            <a href="http://votredomaine.com" class="btn">Visitez notre site</a>
+        </div>
+        <div class="footer">
+            <p>{{ boulangerie.nom }} - {{ boulangerie.adresse }} - {{ boulangerie.ville }}</p>
+            <p>Téléphone : {{ boulangerie.telephone }}</p>
+        </div>
+    </div>
+</body>
+</html>

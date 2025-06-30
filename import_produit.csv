@@ -1,0 +1,66 @@
+id;image;nom;description;prix;date_creation;categorie_id
+1;NULL;Cafe;NULL;1.5;NULL;1
+2;NULL;Cappuccino;NULL;1.9;NULL;1
+3;NULL;Chocolat chaud;NULL;1.8;NULL;1
+4;NULL;Coca-cola;NULL;1.5;NULL;1
+5;NULL;Expresso;NULL;1.7;NULL;1
+6;NULL;Fanta;NULL;1.5;NULL;1
+7;NULL;Jus de pomme;NULL;1.9;NULL;1
+8;NULL;Jus d'orange;NULL;1.9;NULL;1
+9;NULL;Sprite;NULL;1.5;NULL;1
+10;NULL;The;NULL;1.3;NULL;1
+11;NULL;Menu Croissant;NULL;3.5;NULL;2
+12;NULL;Menu Pain au chocolat;NULL;3.5;NULL;2
+13;NULL;Menu Salade de pates;NULL;6.7;NULL;2
+14;NULL;Menu Salade de poulet;NULL;6.7;NULL;2
+15;NULL;Menu Salade de thon;NULL;6.8;NULL;2
+16;NULL;Menu Salade vegetarienne;NULL;6.5;NULL;2
+17;NULL;Menu Sandwich au poulet;NULL;7.5;NULL;2
+18;NULL;Menu Sandwich au thon;NULL;7.6;NULL;2
+19;NULL;Menu Sandwich jambon-beurre;NULL;7.8;NULL;2
+20;NULL;Baguette;NULL;1.1;NULL;3
+21;NULL;Baguette aux cereales;NULL;1.5;NULL;3
+22;NULL;Pain au levain;NULL;1.7;NULL;3
+23;NULL;Pain au mais;NULL;1.4;NULL;3
+24;NULL;Pain aux graines;NULL;1.8;NULL;3
+25;NULL;Pain bio;NULL;1.9;NULL;3
+26;NULL;Pain bretzel;NULL;2.3;NULL;3
+27;NULL;Pain complet;NULL;2.5;NULL;3
+28;NULL;Pain de campagne;NULL;2.1;NULL;3
+29;NULL;Pain de seigle;NULL;2.3;NULL;3
+30;NULL;Pain viennois;NULL;2.6;NULL;3
+31;NULL;Tradition;NULL;2.2;NULL;3
+32;NULL;Baba au rhum;NULL;2.1;NULL;4
+33;NULL;Eclair au cafe;NULL;2.3;NULL;4
+34;NULL;Eclair au chocolat;NULL;2.4;NULL;4
+35;NULL;Flan patissier;NULL;3.5;NULL;4
+36;NULL;Mille-feuille;NULL;2.7;NULL;4
+37;NULL;Mousse au chocolat;NULL;2.3;NULL;4
+38;NULL;Opera;NULL;2.3;NULL;4
+39;NULL;Paris-brest;NULL;2.5;NULL;4
+40;NULL;Religieuse;NULL;2.1;NULL;4
+41;NULL;Tarte au citron;NULL;2.6;NULL;4
+42;NULL;Tarte aux fraises;NULL;2.6;NULL;4
+43;NULL;Tarte aux framboises;NULL;2.6;NULL;4
+44;NULL;Tarte aux pommes;NULL;2.5;NULL;4
+45;NULL;Tartelette aux fruits;NULL;2.7;NULL;4
+46;NULL;Croque-monsieur;NULL;3.5;NULL;5
+47;NULL;Feuillete au jambon;NULL;3.2;NULL;5
+48;NULL;Feuillete aux legumes;NULL;3.1;NULL;5
+49;NULL;Feuillete roule a la saucisse;NULL;3.2;NULL;5
+50;NULL;Pizza;NULL;5.8;NULL;5
+51;NULL;Quiche lorraine;NULL;5.6;NULL;5
+52;NULL;Salade de pates;NULL;5.2;NULL;5
+53;NULL;Salade de poulet;NULL;5.3;NULL;5
+54;NULL;Salade de thon;NULL;5.5;NULL;5
+55;NULL;Salade vegetarienne;NULL;5.7;NULL;5
+56;NULL;Sandwich au fromage;NULL;5.5;NULL;5
+57;NULL;Sandwich au poulet;NULL;5.5;NULL;5
+58;NULL;Sandwich au thon;NULL;5.5;NULL;5
+59;NULL;Sandwich jambon-beurre;NULL;5.5;NULL;5
+60;NULL;Brioche;NULL;2.4;NULL;6
+61;NULL;Chausson aux pommes;NULL;2.1;NULL;6
+62;NULL;Croissant;NULL;1.8;NULL;6
+63;NULL;Pain au chocolat;NULL;1.8;NULL;6
+64;NULL;Pain aux raisins;NULL;2.3;NULL;6
+65;NULL;Pain suisse;NULL;2.8;NULL;6

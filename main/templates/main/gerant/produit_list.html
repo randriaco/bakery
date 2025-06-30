@@ -1,0 +1,120 @@
+{% extends "main/bases/base_gerant.html" %}
+{% load static %}
+
+{% block title %}Liste des Produits{% endblock %}
+{% block page_title %}Liste des Produits{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col">
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col text-end">
+            <a href="{% url 'nouveau_produit' %}" class="btn btn-orange">
+                <i class="fas fa-plus"></i> Nouveau Produit
+            </a>
+        </div>
+    </div>
+
+    <div class="accordion" id="categoriesAccordion">
+        {% regroup produits by categorie as categorie_list %}
+        {% for categorie in categorie_list %}
+        <div class="accordion-item mb-4 border-0 shadow-sm">
+            <h2 class="accordion-header" id="heading{{ categorie.grouper.id }}">
+                <button class="accordion-button bg-brown text-white fw-bold {% if not forloop.first %}collapsed{% endif %}" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#collapse{{ categorie.grouper.id }}" 
+                        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" 
+                        aria-controls="collapse{{ categorie.grouper.id }}">
+                    <div class="d-flex align-items-center w-100">
+                        <span class="me-auto">{{ categorie.grouper.nom }}</span>
+                        <span class="badge bg-orange rounded-pill ms-2">{{ categorie.list|length }}</span>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapse{{ categorie.grouper.id }}" 
+                 class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                 aria-labelledby="heading{{ categorie.grouper.id }}" 
+                 data-bs-parent="#categoriesAccordion">
+                <div class="accordion-body bg-cream p-4">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        {% for produit in categorie.list %}
+                        <div class="col">
+                            <div class="card h-100">
+                                {% if produit.image %}
+                                <div class="product-image-container">
+                                    <img src="{{ produit.image.url }}" class="product-image" alt="{{ produit.nom }}">
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title text-brown">{{ produit.nom }}</h5>
+                                    <p class="card-text">
+                                        <span class="badge bg-orange">{{ produit.categorie.nom }}</span>
+                                    </p>
+                                    <p class="card-text">
+                                        <strong>Prix : </strong>{{ produit.prix }} €
+                                    </p>
+                                    {% if produit.description %}
+                                    <p class="card-text">{{ produit.description }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-2">
+                                    <a href="{% url 'modifier_produit' produit.pk %}" class="btn btn-orange btn-sm">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ produit.pk }}">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal de confirmation pour la suppression -->
+                        <div class="modal fade" id="deleteModal{{ produit.pk }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ produit.pk }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-beige">
+                                        <h5 class="modal-title text-brown" id="deleteModalLabel{{ produit.pk }}">Confirmer la suppression</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Êtes-vous sûr de vouloir supprimer le produit <strong>{{ produit.nom }}</strong> ?</p>
+                                        <p class="text-danger"><small>Cette action est irréversible.</small></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                        <form action="{% url 'supprimer_produit' produit.pk %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card">
+            <div class="card-body text-center">
+                <p class="mb-0">Aucun produit n'a été créé.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

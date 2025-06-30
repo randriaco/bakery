@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tableau de bord Gérant{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'main/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="layout-wrapper">
+        {% include 'main/partials/navbar_gerant.html' %}
+
+        <!-- Contenu principal -->
+        <div class="main-content">
+            <!-- Top bar -->
+            <div class="top-bar d-flex justify-content-between align-items-center">
+                <h1 class="h3 text-brown mb-0">{% block page_title %}Tableau de bord{% endblock %}</h1>
+                
+                <!-- Menu utilisateur -->
+                <div class="user-menu dropdown">
+                    <button class="btn btn-link dropdown-toggle text-brown" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-2"></i> Gérant
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Mon profil</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-home me-2"></i> Accueil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Contenu de la page -->
+            <div class="content-wrapper">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'main/js/gerant.js' %}"></script>
+</body>
+</html>

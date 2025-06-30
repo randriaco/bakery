@@ -1,0 +1,72 @@
+<footer class="bg-brown text-white py-5">
+    <div class="container">
+        <div class="row">
+            {# Quick Links #}
+            <div class="col-md-3 mb-4">
+                <h3 class="h5 mb-3 bg-white p-2 text-brown fw-bold text-center border rounded-2">Liens Rapides</h3>
+                <ul class="list-unstyled">
+                    <li><a href="" class="text-white text-decoration-none hover-orange">Accueil</a></li>
+                    <li><a href="" class="text-white text-decoration-none hover-orange">Commander</a></li>
+                    <li><a href="" class="text-white text-decoration-none hover-orange">Contact</a></li>
+                </ul>
+            </div>
+
+            {# Contact Info #}
+            <div class="col-md-3 mb-4">
+                <h3 class="h5 mb-3 bg-white p-2 text-brown fw-bold text-center border rounded-2">Contact</h3>
+                <ul class="list-unstyled">
+                    <li>{{ boulangerie.nom }}</li>
+                    <li>{{ boulangerie.adresse }}</li>
+                    <li>{{ boulangerie.code }} {{ boulangerie.ville }}</li>
+                    <li>Tél : {{ boulangerie.telephone }}</li>
+                    <li>Email : {{ boulangerie.email }}</li>         
+                </ul>
+            </div>
+
+            {# Opening Hours #}
+            <div class="col-md-3 mb-4">
+                <h3 class="h5 mb-3 bg-white p-2 text-brown fw-bold text-center border rounded-2">Horaires d Ouverture</h3>
+                <ul class="list-unstyled">
+                    <li>Lundi : 7h - 20h</li>
+                    <li>Mardi : 7h - 20h</li>
+                    <li>Mercredi : 7h - 20h</li>
+                    <li>Jeudi : 7h - 20h</li>
+                    <li>Vendredi : 7h - 20h</li>
+                    <li>Samedi: 7h - 19h</li>
+                    <li>Dimanche: 7h - 13h</li>
+                </ul>
+            </div>
+
+            {# Social Media #}
+            <div class="col-md-3 mb-4">
+                <h3 class="h5 mb-3 bg-white p-2 text-brown fw-bold text-center border rounded-2">Suivez-nous</h3>
+                <div class="d-flex gap-3">
+                    <a href="" class="text-white hover-orange">
+                        <i class="fab fa-facebook-f fa-lg"></i>
+                    </a>
+                    <a href="" class="text-white hover-orange">
+                        <i class="fab fa-instagram fa-lg"></i>
+                    </a>
+                    <a href="" class="text-white hover-orange">
+                        <i class="fab fa-twitter fa-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-white-50">
+
+        <div class="row text-center">
+            <div class="col-12">
+                <p class="mb-2">&copy; 2025 - {{ boulangerie.nom}}. Tous droits réservés.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="" class="text-white text-decoration-none hover-orange">Mentions Légales</a>
+                    <span class="text-white-50">|</span>
+                    <a href="" class="text-white text-decoration-none hover-orange">Politique de Confidentialité</a>
+                    <span class="text-white-50">|</span>
+                    <a href="" class="text-white text-decoration-none hover-orange">CGV</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

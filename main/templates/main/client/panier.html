@@ -1,0 +1,486 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <!-- Hero Section -->
+    <section class="bg-beige py-4">
+        <div class="container">
+            <h1 class="display-5 text-brown fw-bold mb-0">
+                <i class="fas fa-shopping-cart me-3"></i>Mon Panier
+            </h1>
+        </div>
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Liste des produits -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 text-brown fw-bold">
+                                Récapitulatif de votre commande
+                                <span id="badge-count" class="badge bg-orange text-white ms-2">0 article(s)</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Contenu du panier -->
+                            <div id="panier-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Résumé commande -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 sticky-top" style="top: 80px;">
+                        <div class="card-header bg-brown text-white">
+                            <h5 class="mb-0 fw-bold">Résumé de la commande</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Détails -->
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Sous-total</span>
+                                <span class="fw-bold" id="sous-total">0.00€</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Frais de service</span>
+                                <span class="fw-bold">Gratuit</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-4">
+                                <span class="h5 mb-0">Total</span>
+                                <span class="h5 mb-0 text-orange fw-bold" id="total">0.00€</span>
+                            </div>
+
+                            <!-- Heure de retrait -->
+                            <div class="mb-4" id="heure-section" style="display: none;">
+                                <label class="form-label text-brown fw-bold">
+                                    <i class="fas fa-clock me-2"></i>Heure de retrait souhaitée
+                                </label>
+                                <select class="form-select" id="heure-retrait">
+                                    <option value="">Choisir un créneau</option>
+                                    <option value="08:00">08:00 - 09:00</option>
+                                    <option value="09:00">09:00 - 10:00</option>
+                                    <option value="10:00">10:00 - 11:00</option>
+                                    <option value="11:00">11:00 - 12:00</option>
+                                    <option value="12:00">12:00 - 13:00</option>
+                                    <option value="14:00">14:00 - 15:00</option>
+                                    <option value="15:00">15:00 - 16:00</option>
+                                    <option value="16:00">16:00 - 17:00</option>
+                                    <option value="17:00">17:00 - 18:00</option>
+                                    <option value="18:00">18:00 - 19:00</option>
+                                </select>
+                            </div>
+
+                            <!-- Bouton commander -->
+                            <button class="btn btn-orange w-100 py-3 fw-bold" 
+                                    id="btn-paiement"
+                                    onclick="procederPaiement()"
+                                    disabled>
+                                <i class="fas fa-lock me-2"></i>Procéder au paiement
+                            </button>
+                            
+                            <!-- Infos sécurité -->
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Paiement sécurisé par Stripe
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Infos pratiques -->
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-body">
+                            <h6 class="text-brown fw-bold mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Informations
+                            </h6>
+                            <ul class="list-unstyled small text-muted mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Commande disponible en 30 minutes
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Paiement sécurisé en ligne
+                                </li>                                
+                                <li>
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Retrait en magasin uniquement
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal de confirmation pour supprimer un produit -->
+<div class="modal fade" id="modalSupprimerProduit" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce produit du panier ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" onclick="confirmerSuppressionProduit()">
+                    <i class="fas fa-trash me-2"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation pour vider le panier -->
+<div class="modal fade" id="modalViderPanier" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-circle me-2"></i>Attention
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Êtes-vous sûr de vouloir vider votre panier ?</p>
+                <p class="text-muted small">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" onclick="confirmerViderPanier()">
+                    <i class="fas fa-trash me-2"></i>Vider le panier
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de succès paiement -->
+<div class="modal fade" id="modalPaiement" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Paiement
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-lock fa-3x text-success mb-3"></i>
+                <p>Redirection vers le paiement sécurisé...</p>
+                <p class="text-muted small">Vous allez être redirigé vers notre plateforme de paiement sécurisée Stripe.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Cards produits responsive */
+.produit-card {
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.produit-card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
+    transform: translateY(-3px);
+}
+
+/* Boutons quantité */
+.btn-quantite {
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.btn-quantite:hover:not(:disabled) {
+    background-color: var(--color-orange);
+    color: white;
+    border-color: var(--color-orange);
+}
+
+/* Texte orange pour catégorie */
+.text-orange {
+    color: var(--color-orange);
+}
+
+/* Labels descriptifs */
+.produit-card p.text-muted {
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: Capitalize;
+    letter-spacing: 0.5px;
+}
+
+/* Style responsive pour mobile */
+@media (max-width: 576px) {
+    .produit-card .card-body {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    /* Centrage sur mobile */
+    .produit-card .row > div {
+        text-align: center !important;
+    }
+    
+    /* Boutons pleine largeur sur mobile */
+    .btn-lg {
+        width: 100%;
+    }
+    
+    /* Bordures de séparation sur mobile uniquement */
+    .produit-card .col-12:not(:last-child) {
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem !important;
+    }
+}
+
+/* Desktop: alignement */
+@media (min-width: 577px) {
+    .produit-card .col-sm-4 {
+        text-align: left !important;
+    }
+    
+    .produit-card .col-sm-2,
+    .produit-card .col-sm-3 {
+        text-align: center !important;
+    }
+    
+    .produit-card .col-sm-3:last-child .d-flex {
+        justify-content: flex-end !important;
+    }
+    
+    /* Boutons taille normale sur desktop */
+    .btn-lg {
+        width: auto;
+    }
+}
+</style>
+
+<script>
+let panier = [];
+let produitASupprimer = null;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    chargerPanier();
+    afficherPanier();
+    
+    // Écouter les changements d'heure
+    document.getElementById('heure-retrait').addEventListener('change', updateBoutonPaiement);
+});
+
+function chargerPanier() {
+    panier = JSON.parse(localStorage.getItem('panier') || '[]');
+}
+
+function afficherPanier() {
+    const container = document.getElementById('panier-content');
+    const badgeCount = document.getElementById('badge-count');
+    const heureSection = document.getElementById('heure-section');
+    
+    if (panier.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-basket fa-5x text-muted mb-4"></i>
+                <h4 class="text-muted mb-3">Votre panier est vide</h4>
+                <p class="text-muted mb-4 fs-5">Découvrez nos délicieux produits artisanaux</p>
+                <a href="{% url 'commander' %}" class="btn btn-orange btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Continuer mes achats
+                </a>
+            </div>
+        `;
+        heureSection.style.display = 'none';
+    } else {
+        let html = `<div class="produits-list">`;
+        
+        panier.forEach((item, index) => {
+            const sousTotal = (item.prix * item.quantite).toFixed(2);
+            html += `
+                <div class="card produit-card mb-3 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center text-center text-sm-start">
+                            <!-- Produit -->
+                            <div class="col-12 col-sm-4 mb-4 mb-sm-0">
+                                <h4 class="text-brown fw-5 fs-5 mb-2">${item.nom}</h4>
+                                <p class="text-orange fw-bold mb-0 fs-5">${item.categorie}</p>
+                            </div>
+                            
+                            <!-- Prix unitaire -->
+                            <div class="col-12 col-sm-2 mb-4 mb-sm-0">
+                                <p class="text-muted mb-2">Prix Unitaire</p>
+                                <p class="fw-bold mb-0 fs-5">${item.prix}€</p>
+                            </div>
+                            
+                            <!-- Quantité -->
+                            <div class="col-12 col-sm-3 mb-4 mb-sm-0">
+                                <p class="text-muted mb-3">Quantité</p>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <button onclick="diminuerQuantite(${index})" 
+                                            class="btn btn-outline-secondary btn-quantite"
+                                            ${item.quantite <= 1 ? 'disabled' : ''}>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="mx-4 fw-bold fs-4">${item.quantite}</span>
+                                    <button onclick="augmenterQuantite(${index})" 
+                                            class="btn btn-outline-secondary btn-quantite">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Sous-total -->
+                            <div class="col-12 col-sm-3">
+                                <p class="text-muted mb-3">Sous-total</p>
+                                <div class="d-flex align-items-center justify-content-center justify-content-sm-end gap-3">
+                                    <p class="fw-bold fs-5 text-brown mb-0">${sousTotal}€</p>
+                                    <button onclick="supprimerProduit(${index})" 
+                                            class="btn btn-danger"
+                                            title="Supprimer ce produit">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+            </div>
+            <hr class="my-4">
+            <div class="row mt-4">
+                <div class="col-12 col-md-6 mb-3 mb-md-0 text-center text-md-start">
+                    <a href="{% url 'commander' %}" class="btn btn-orange btn-lg px-5 py-3">
+                        <i class="fas fa-arrow-left me-2"></i>Continuer mes achats
+                    </a>
+                </div>
+                <div class="col-12 col-md-6 text-center text-md-end">
+                    <button onclick="viderPanier()" class="btn btn-danger btn-lg fw-bold text-white px-5 py-3">
+                        <i class="fas fa-trash me-2"></i>Vider le panier
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        heureSection.style.display = 'block';
+    }
+    
+    // Mettre à jour le badge et les totaux
+    const totalArticles = panier.reduce((sum, item) => sum + item.quantite, 0);
+    badgeCount.textContent = totalArticles + ' article(s)';
+    
+    calculerTotaux();
+    updateBoutonPaiement();
+}
+
+function calculerTotaux() {
+    const sousTotal = panier.reduce((total, item) => total + (item.prix * item.quantite), 0);
+    document.getElementById('sous-total').textContent = sousTotal.toFixed(2) + '€';
+    document.getElementById('total').textContent = sousTotal.toFixed(2) + '€';
+}
+
+function augmenterQuantite(index) {
+    panier[index].quantite += 1;
+    sauvegarderPanier();
+}
+
+function diminuerQuantite(index) {
+    if (panier[index].quantite > 1) {
+        panier[index].quantite -= 1;
+        sauvegarderPanier();
+    }
+}
+
+function supprimerProduit(index) {
+    produitASupprimer = index;
+    const modal = new bootstrap.Modal(document.getElementById('modalSupprimerProduit'));
+    modal.show();
+}
+
+function confirmerSuppressionProduit() {
+    if (produitASupprimer !== null) {
+        panier.splice(produitASupprimer, 1);
+        sauvegarderPanier();
+        produitASupprimer = null;
+        
+        // Fermer le modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalSupprimerProduit'));
+        modal.hide();
+    }
+}
+
+function viderPanier() {
+    const modal = new bootstrap.Modal(document.getElementById('modalViderPanier'));
+    modal.show();
+}
+
+function confirmerViderPanier() {
+    panier = [];
+    sauvegarderPanier();
+    
+    // Fermer le modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalViderPanier'));
+    modal.hide();
+}
+
+function sauvegarderPanier() {
+    localStorage.setItem('panier', JSON.stringify(panier));
+    afficherPanier();
+    updateBadgeNavbar();
+}
+
+function updateBadgeNavbar() {
+    const total = panier.reduce((sum, item) => sum + item.quantite, 0);
+    const badges = document.querySelectorAll('.navbar .badge');
+    badges.forEach(badge => {
+        badge.textContent = total;
+        badge.style.display = total > 0 ? 'inline-block' : 'none';
+    });
+}
+
+function updateBoutonPaiement() {
+    const btnPaiement = document.getElementById('btn-paiement');
+    const heureRetrait = document.getElementById('heure-retrait').value;
+    
+    btnPaiement.disabled = panier.length === 0 || !heureRetrait;
+}
+
+function procederPaiement() {
+    const heureRetrait = document.getElementById('heure-retrait').value;
+    if (panier.length > 0 && heureRetrait) {
+        const modal = new bootstrap.Modal(document.getElementById('modalPaiement'));
+        modal.show();
+        
+        // TODO: Intégration Stripe
+        // Après 2 secondes, rediriger vers Stripe
+        setTimeout(() => {
+            // window.location.href = '/paiement/stripe/';
+        }, 2000);
+    }
+}
+</script>
+{% endblock %}

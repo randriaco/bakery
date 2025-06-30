@@ -1,0 +1,44 @@
+{% extends "main/bases/base_gerant.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Modifier{% else %}Nouvelle{% endif %} Catégorie{% endblock %}
+{% block page_title %}{% if form.instance.pk %}Modifier{% else %}Nouvelle{% endif %} Catégorie{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-beige">
+                    <h2 class="text-center text-brown mb-0">{% if form.instance.pk %}Modifier{% else %}Nouvelle{% endif %} Catégorie</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="p-4">
+                        {% csrf_token %}
+                        
+                        <div class="form-floating mb-3 fw-bold">
+                            {{ form.nom }}
+                            <label for="{{ form.nom.id_for_label }}">
+                                <i class="fas fa-tag"></i> Nom de la catégorie
+                            </label>
+                        </div>
+
+                        <div class="form-floating mb-3 fw-bold">
+                            {{ form.ordre }}
+                            <label for="{{ form.ordre.id_for_label }}">
+                                <i class="fas fa-sort-numeric-down"></i> Ordre d'affichage
+                            </label>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-orange px-4 py-2">
+                                {% if form.instance.pk %}Modifier{% else %}Créer{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

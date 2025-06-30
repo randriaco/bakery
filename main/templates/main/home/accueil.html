@@ -1,0 +1,307 @@
+
+{% extends "main/bases/base.html" %}
+{% load static %}
+
+{% block content %}
+    {# Section boutique #}
+<section class="py-5">
+    <div class="container">
+        <h1 class="text-center mb-5 fw-bold" style="color: #8B4513;">Notre boutique</h1>
+
+        {# Affichage des messages flash #}
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+            {# Card 1 - Coordonnées #}
+            <div class="col">
+                <div class="card h-100 bg-beige">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-address-card me-2" style="color: #8B4513;"></i>
+                            Adresse
+                        </h5>
+                        <p class="card-text">
+                            {{ boulangerie.nom }}<br>
+                            {{ boulangerie.adresse }}<br>
+                            {{ boulangerie.code }} {{ boulangerie.ville }}
+                        </p>
+
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-map-marker-alt" style="color: #8B4513;"></i>
+                            Plan
+                        </h5>
+                        <p class="card-text text-center">
+                           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5257.107607216995!2d2.329439975053619!3d48.7904081054902!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6713b92ad4781%3A0xd77c96b82ce6aa65!2s5%20Av.%20du%20Mar%C3%A9chal%20de%20Lattre%20de%20Tassigny%2C%2094230%20Cachan!5e0!3m2!1sfr!2sfr!4v1739898432909!5m2!1sfr!2sfr" 
+                            width="400" 
+                            height="400" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {# Card 2 - Horaires #}
+            <div class="col">
+                <div class="card h-100 bg-beige">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-phone me-2" style="color: #8B4513;"></i>
+                            Téléphone
+                        </h5>
+                        <p class="card-text">
+                            Tél : {{ boulangerie.telephone }}
+                        </p>
+
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-envelope me-2" style="color: #8B4513;"></i>
+                            Email
+                        </h5>
+                        <p class="card-text">
+                            Email : {{ boulangerie.email }}
+                        </p>
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-clock me-2" style="color: #8B4513;"></i>
+                            Horaires d'ouverture
+                        </h5>
+                        <p class="card-text">
+                            Lundi : Fermé<br>
+                            Mardi : 7h - 20h<br>
+                            Mercredi : 7h - 20h<br>
+                            Jeudi : 7h - 20h<br>
+                            Vendredi : 7h - 20h<br>
+                            Samedi : 7h - 19h<br>
+                            Dimanche : 7h - 13h
+                        </p>
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-shopping-bag me-2" style="color: #8B4513;"></i>
+                            Click and Collect 
+                        </h5>
+                        <p class="card-text">
+                            Profitez de notre boutique en ligne, accessible à tout moment ! 
+                            Commandez et récupérez vos achats à l'heure qui vous convient le mieux. 
+                            Plus besoin d'attendre, plus de contraintes !<br>
+                            <div class="text-center mt-4 p-4 bg-beige">
+                                <a href="" class="btn btn-orange" >Commander Maintenant</a>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Texte et bouton de commande #}
+        <div class="text-center border rounded-3 p-4 bg-beige">
+            <p class="lead mb-4">Gagnez du Temps, Commandez en Ligne, disponible 7j/7, 24h/24, et c est gratuit !</p>
+            <p>Pourquoi attendre ? Commandez vos délices préférés en un clic et récupérez-les sans file d'attente. Votre temps est précieux, profitez-en !</p>
+            <a href="" class="btn btn-orange" >Commander Maintenant</a>
+        </div>
+    </div>
+</section>
+
+{# Produits les plus vendus #}
+<section class="py-5 bg-beige">
+    <div class="container">
+        <h2 class="text-center text-brown mb-5 fw-bold">Nos 3 Produits les plus vendus</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="position-relative p-3">
+                        <span class="badge-viennoiserie">Viennoiserie</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-dark fw-bold mb-3">Croissant</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-4 fw-bold text-brown">2,20 €</span>
+                            <a href="#" class="btn btn-orange">Commander</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100">
+                    <div class="position-relative p-3">
+                        <span class="badge-viennoiserie">Viennoiserie</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-dark fw-bold mb-3">Pain au chocolat</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-4 fw-bold text-brown">3,20 €</span>
+                            <a href="#" class="btn btn-orange">Commander</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100">
+                    <div class="position-relative p-3">
+                        <span class="badge-viennoiserie">Viennoiserie</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-dark fw-bold mb-3">Pain aux raisins</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-4 fw-bold text-brown">2,90 €</span>
+                            <a href="#" class="btn btn-orange">Commander</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center p-4 bg-beige mt-5">
+        <p class="lead mb-4">Votre Boulangerie à Portée de Clic !</p>
+        <p>Votre boulangerie préférée est désormais à portée de clic ! Commandez à l'avance et récupérez votre commande à l'heure qui vous convient !</p>
+        <a href="" class="btn btn-orange" >Commander Maintenant</a>
+    </div>
+
+</section>
+
+{# Formules les plus vendues #}
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center text-brown mb-5 fw-bold">Nos 3 Formules les plus vendues</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-100 bg-beige">
+                    <div class="position-relative p-3">
+                        <span class="badge-viennoiserie">Formules</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-dark fw-bold mb-3">Sandwich Jambon</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-4 fw-bold text-brown">7,50 €</span>
+                            <a href="#" class="btn btn-orange">Commander</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100 bg-beige">
+                    <div class="position-relative p-3">
+                        <span class="badge-viennoiserie">Formules</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-dark fw-bold mb-3">Sandwich au Poulet</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-4 fw-bold text-brown">7,90 €</span>
+                            <a href="#" class="btn btn-orange">Commander</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100 bg-beige">
+                    <div class="position-relative p-3">
+                        <span class="badge-viennoiserie">Formules</span>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3 class="card-title text-dark fw-bold mb-3">Sandwich au Lardon</h3>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-4 fw-bold text-brown">5,90 €</span>
+                            <a href="#" class="btn btn-orange">Commander</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center p-4 bg-white mt-5">
+        <p class="lead mb-4">Fraîcheur Garantie, Zéro Attente !</p>
+        <p>Commandez en ligne et assurez-vous de la fraîcheur de vos produits préférés sans les tracas des files d attente. Votre satisfaction est notre priorité !</p>
+        <a href="" class="btn btn-orange" >Commander Maintenant</a>
+    </div>
+
+</section>
+
+{% include 'main/home/avantages.html' %}
+
+{# Contact Form Section #}
+<section id="contact" class="py-5 bg-beige">
+    <div class="container">
+        <h2 class="text-center text-brown mb-5 fw-bold">Nous contacter</h2>
+        <div class="row g-4">
+            {# Colonne 1 - Informations de contact #}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-map-marker-alt me-2" style="color: #8B4513;"></i>
+                            Adresse
+                        </h5>
+                        <p class="mb-4">
+                            {{ boulangerie.nom }}<br>
+                            {{ boulangerie.adresse }}<br>
+                            {{ boulangerie.code }} {{ boulangerie.ville }}<br>
+                        </p>
+
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-phone me-2" style="color: #8B4513;"></i>
+                            Téléphone
+                        </h5>
+                        <p class="mb-4">
+                            Tél : {{ boulangerie.telephone }}
+                        </p>
+
+                        <h5 class="card-title mb-4 text-brown fw-bold">
+                            <i class="fas fa-envelope me-2" style="color: #8B4513;"></i>
+                            Email
+                        </h5>
+                        <p class="mb-4">
+                            Email : {{ boulangerie.email }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {# Colonne 2 - Formulaire de contact #}
+            <div class="col-md-6">
+                
+                <form class="card p-4 h-100" action="{% url 'accueil' %}" method="post">
+                {% csrf_token %}  <!-- Ajoutez cette ligne pour la protection CSRF -->
+                
+                    <div class="form-floating mb-3 fw-bold">
+                        <input type="text" class="form-control input-ombre" id="nom" name="nom" required>
+                        <label for="nom"><i class="fa-solid fa-user"></i> Nom</label>
+                    </div>
+                
+                    <div class="form-floating mb-3 fw-bold">
+                        <input type="email" class="form-control input-ombre" id="email" name="email" required>
+                        <label for="email"><i class="fa fa-envelope mr-3"></i> Email</label>
+                    </div>
+
+                    <div class="form-floating mb-4 fw-bold">
+                        <textarea class="form-control input-ombre" id="message" name="message" style="height: 150px" required></textarea>
+                        <label for="message"><i class="fa fa-comment mr-3"></i> Message</label>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-orange px-4 py-2">Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center p-4 bg-beige mt-5">
+        <p class="lead mb-4">Vos Envies, Prêtes Quand vous l'etes !</p>
+        <p>Commandez en ligne et assurez-vous que vos produits préférés sont prêts à l'heure qui vous convient. Plus besoin de se presser, votre boulangerie s'adapte à votre emploi du temps !</p>
+        <a href="" class="btn btn-orange" >Commander Maintenant</a>
+    </div>
+
+</section>
+{% endblock %}

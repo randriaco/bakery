@@ -1,0 +1,270 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block content %}
+<div>
+    <!-- Hero Section -->
+    <section class="bg-beige py-5">
+        <div class="container text-center">
+            <h1 class="display-4 text-brown fw-bold mb-3">
+                <i class="fas fa-shopping-basket me-3"></i>Nos Produits
+            </h1>
+            <p class="lead text-muted">Découvrez nos délicieux produits artisanaux</p>
+        </div>
+    </section>
+
+    <!-- Notification Toast -->
+    <div id="notification-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    </div>
+
+    <!-- Filtres par catégorie -->
+    <section class="py-4 bg-white shadow-sm sticky-top" style="top: 56px; z-index: 100;">
+        <div class="container">
+            <!-- Titre centré -->
+            <div class="text-center mb-3">
+                <h5 class="text-brown fw-bold mb-0">Filtrer par :</h5>
+            </div>
+            
+            <!-- Boutons de filtrage -->
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <button onclick="filterCategorie(null)" 
+                        data-categorie="all"
+                        class="btn btn-sm rounded-pill px-4 fw-bold btn-categorie active bg-orange text-white">
+                    <i class="fas fa-th me-2"></i>Tous les produits
+                </button>
+                {% for categorie in categories %}
+                <button onclick="filterCategorie({{ categorie.id }})" 
+                        data-categorie="{{ categorie.id }}"
+                        class="btn btn-sm rounded-pill px-4 fw-bold btn-categorie bg-light">
+                    <i class="fas fa-tag me-2"></i>{{ categorie.nom }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Produits -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            {% for categorie in categories %}
+            <div class="categorie-section" data-categorie-id="{{ categorie.id }}">
+                
+                <!-- Titre de catégorie -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-grow-1">
+                        <h2 class="h3 text-brown fw-bold mb-0">
+                            <i class="fas fa-angle-right me-2"></i>{{ categorie.nom }}
+                        </h2>
+                    </div>
+                    <div class="badge bg-brown text-white px-3 py-2">
+                        {{ categorie.produits.count }} produits
+                    </div>
+                </div>
+
+                <!-- Grille de produits -->
+                <div class="row g-4">
+                    {% for produit in categorie.produits.all %}
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 produit-card border-0 shadow-sm">
+                            <!-- Badge catégorie -->
+                            <div class="card-header p-2 border-0 bg-transparent">
+                                <span class="badge w-100 py-2 text-white fw-bold rounded-1" style="background-color: var(--color-brown);">
+                                    {{ categorie.nom }}
+                                </span>
+                            </div>
+                            
+                            <!-- Corps de la carte -->
+                            <div class="card-body text-center d-flex flex-column">
+                                <!-- Nom du produit -->
+                                <h5 class="card-title text-brown fw-bold mb-2">{{ produit.nom }}</h5>
+                                
+                                <!-- Description (optionnelle) -->
+                                {% comment %} {% if produit.description %}
+                                <p class="card-text text-muted small mb-3">{{ produit.description|truncatewords:10 }}</p>
+                                {% endif %} {% endcomment %}
+                                
+                                <!-- Prix class="mt-auto"-->
+                                <div>
+                                    <p class="h4 text-orange fw-bold mb-6">{{ produit.prix }} €</p>
+                                    
+                                    <!-- Bouton Commander -->
+                                   
+                                    <button class="btn btn-orange fw-bold px-4 py-2 mt-auto mb-3"
+                                            onclick="ajouterAuPanier({{ produit.id }}, '{{ produit.nom|escapejs }}', {{ produit.prix }}, '{{ categorie.nom|escapejs }}')">
+                                        Commander
+                                    </button>
+                                    <!-- Bouton panier -->
+                                    <a href="{% url 'panier' %}" class="btn btn-orange fw-bold px-4 py-2 mt-auto" style="color: #8B4513; text-decoration: none;">
+                                        <i class="fas fa-shopping-cart me-1"></i>
+                                        Voir le Panier
+                                        <span class="badge rounded-circle fw-bold ms-1" 
+                                            style="background-color: #D86B1E; color: white; padding: 4px 8px; display: none;">
+                                            0
+                                        </span>
+                                    </a>
+                                  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+.produit-card {
+    transition: all 0.3s ease;
+    min-height: 280px;
+}
+
+.produit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+}
+
+.btn:focus {
+    box-shadow: none !important;
+}
+
+.btn-categorie {
+    transition: all 0.3s ease;
+}
+
+.btn-categorie.active {
+    background-color: var(--color-orange) !important;
+    color: white !important;
+}
+
+.btn-categorie:not(.active):hover {
+    background-color: var(--color-beige) !important;
+}
+
+.categorie-section {
+    display: block;
+    margin-bottom: 3rem;
+}
+
+.categorie-section.d-none {
+    display: none !important;
+}
+
+/* Style pour le bouton Commander */
+.btn-orange {
+    transition: all 0.3s ease;
+}
+
+.btn-orange:hover {
+    transform: scale(1.05);
+}
+
+/* Badge catégorie */
+.badge {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
+
+<script>
+// Gestion du panier
+let panier = JSON.parse(localStorage.getItem('panier') || '[]');
+
+// Fonction pour ajouter au panier
+function ajouterAuPanier(id, nom, prix, categorie) {
+    const produit = {
+        id: id,
+        nom: nom,
+        prix: prix,
+        categorie: categorie
+    };
+    
+    const index = panier.findIndex(item => item.id === produit.id);
+    
+    if (index !== -1) {
+        panier[index].quantite += 1;
+    } else {
+        panier.push({
+            ...produit,
+            quantite: 1
+        });
+    }
+    
+    // Sauvegarder
+    localStorage.setItem('panier', JSON.stringify(panier));
+    
+    // Mettre à jour le badge
+    updateBadge();
+    
+    // Afficher notification
+    showNotification(nom + ' ajouté au panier');
+}
+
+// Mettre à jour le badge du panier
+function updateBadge() {
+    const total = panier.reduce((sum, item) => sum + item.quantite, 0);
+    const badges = document.querySelectorAll('.navbar .badge');
+    badges.forEach(badge => {
+        badge.textContent = total;
+        badge.style.display = total > 0 ? 'inline-block' : 'none';
+    });
+}
+
+// Afficher une notification
+function showNotification(message) {
+    const container = document.getElementById('notification-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast show';
+    toast.innerHTML = `
+        <div class="toast-header bg-orange text-white">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong class="me-auto">Produit ajouté</strong>
+            <button type="button" class="btn-close btn-close-white" onclick="this.closest('.toast').remove()"></button>
+        </div>
+        <div class="toast-body">${message}</div>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Filtrer par catégorie
+function filterCategorie(categorieId) {
+    // Mettre à jour les boutons
+    document.querySelectorAll('.btn-categorie').forEach(btn => {
+        btn.classList.remove('active', 'bg-orange', 'text-white');
+        btn.classList.add('bg-light');
+    });
+    
+    // Activer le bon bouton
+    const activeBtn = categorieId === null 
+        ? document.querySelector('[data-categorie="all"]')
+        : document.querySelector(`[data-categorie="${categorieId}"]`);
+    
+    if (activeBtn) {
+        activeBtn.classList.add('active', 'bg-orange', 'text-white');
+        activeBtn.classList.remove('bg-light');
+    }
+    
+    // Afficher/masquer les catégories
+    document.querySelectorAll('.categorie-section').forEach(section => {
+        if (categorieId === null || section.dataset.categorieId == categorieId) {
+            section.classList.remove('d-none');
+        } else {
+            section.classList.add('d-none');
+        }
+    });
+}
+
+// Initialisation au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    updateBadge();
+});
+</script>
+{% endblock %}

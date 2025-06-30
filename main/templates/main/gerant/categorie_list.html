@@ -1,0 +1,82 @@
+{% extends "main/bases/base_gerant.html" %}
+{% load static %}
+
+{% block title %}Liste des Catégories{% endblock %}
+{% block page_title %}Liste des Catégories{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col">
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col text-end">
+            <a href="{% url 'nouvelle_categorie' %}" class="btn btn-orange">
+                <i class="fas fa-plus"></i> Nouvelle Catégorie
+            </a>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for categorie in categories %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-brown">{{ categorie.nom }}</h5>
+                    <p class="card-text">Ordre d'affichage : {{ categorie.ordre }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-2">
+                    <a href="{% url 'modifier_categorie' categorie.pk %}" class="btn btn-orange btn-sm">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ categorie.pk }}">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmation pour la suppression -->
+        <div class="modal fade" id="deleteModal{{ categorie.pk }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ categorie.pk }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-beige">
+                        <h5 class="modal-title text-brown" id="deleteModalLabel{{ categorie.pk }}">Confirmer la suppression</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer la catégorie <strong>{{ categorie.nom }}</strong> ?</p>
+                        <p class="text-danger"><small>Cette action est irréversible.</small></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <form action="{% url 'supprimer_categorie' categorie.pk %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    Aucune catégorie n'a été créée.
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+<!-- Bouton Menu Burger -->
+<button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <!-- Info Boulangerie -->
+    <div class="boulangerie-info">
+        <h5><i class="fas fa-store"></i> {{ boulangerie.nom }}</h5>
+        <p><i class="fas fa-map-marker-alt"></i> {{ boulangerie.adresse }}</p>
+        <p><i class="fas fa-city"></i> {{ boulangerie.code }} {{ boulangerie.ville }}</p>
+        <p><i class="fas fa-phone"></i> {{ boulangerie.telephone }}</p>
+    </div>
+
+    <!-- Menu principal -->
+    <nav class="mt-3">
+        <a href="{% url 'dashboard_gerant' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard_gerant' %}active{% endif %}">
+            <i class="fas fa-chart-line me-2"></i> Tableau de bord
+        </a>
+
+        <!-- Comptes -->
+        <div class="nav-header">Comptes</div>
+        <a href="#" class="nav-link">
+            <i class="fas fa-store me-2"></i> Restaurant
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-user-tie me-2"></i> Gérant
+        </a>
+
+        <!-- Horaires -->
+        <div class="nav-header">Horaires</div>
+        <a href="#" class="nav-link">
+            <i class="fas fa-clock me-2"></i> Horaires Hebdomadaires
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-calendar-times me-2"></i> Fermetures Spécifiques
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-calendar-alt me-2"></i> Fermetures multi-jour
+        </a>
+
+        <!-- Produits -->
+        <div class="nav-header">Produits</div>
+        <a href="{% url 'liste_categories' %}" class="nav-link {% if 'categorie' in request.path %}active{% endif %}">
+            <i class="fas fa-tags me-2"></i> Catégories
+        </a>
+        <a href="{% url 'liste_produits' %}" class="nav-link {% if 'produit' in request.path %}active{% endif %}">
+            <i class="fas fa-bread-slice me-2"></i> Produits
+        </a>
+    </nav>
+</div>
