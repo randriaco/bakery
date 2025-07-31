@@ -1,0 +1,260 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+{% block title %}Connexion Pro - {{ boulangerie.nom|default:"Pain Doré" }}{% endblock %}
+
+{% block content %}
+<div class="auth-page py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-auto">
+        <div class="auth-card">
+
+          <!-- En-tête -->
+          <div class="auth-header text-center mb-4">
+            <div class="auth-icon mx-auto mb-3">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <h2 class="auth-title">Connexion Pro</h2>
+            <p class="auth-subtitle">Accès réservé au gérant</p>
+          </div>
+
+          <!-- Formulaire -->
+          <form method="post" action="{% url 'connexion_pro' %}" class="auth-form">
+            {% csrf_token %}
+
+            <!-- Email -->
+            <div class="mb-3">
+              <div class="form-floating">
+                <input type="email"
+                       class="form-control"
+                       name="email"
+                       id="email"
+                       placeholder="Email"
+                       required>
+                <label for="email">
+                  <i class="fas fa-envelope me-2"></i>Email
+                </label>
+              </div>
+            </div>
+
+            <!-- Code 6 chiffres -->
+            <div class="mb-3">
+              <div class="form-floating position-relative">
+                <input type="password"
+                       class="form-control"
+                       name="password"
+                       id="password"
+                       placeholder="Code à 6 chiffres"
+                       pattern="\d{6}"
+                       maxlength="6"
+                       required>
+                <label for="password">
+                  <i class="fas fa-lock me-2"></i>Code à 6 chiffres
+                </label>
+                <button type="button" class="btn-eye" onclick="togglePassword('password')">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Clavier numérique 5×3 -->
+            <div id="numeric-keypad" class="numeric-keypad mb-2"></div>
+
+            <!-- Boutons Retour + Effacer (même largeur que champ) -->
+            <div id="func-buttons" class="func-buttons mb-3">
+              <button type="button" id="btn-back" class="btn key-func">Retour</button>
+              <button type="button" id="btn-clear" class="btn key-func">Effacer</button>
+            </div>
+
+            <!-- Bouton de soumission -->
+            <button type="submit" class="btn btn-orange w-100 py-3 mb-2">
+              <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+            </button>
+
+            {% if error %}
+              <div class="alert alert-danger text-center">{{ error }}</div>
+            {% endif %}
+
+            <!-- Retour à l'accueil (texte seul) -->
+            <div class="text-center mt-3">
+              <a href="{% url 'accueil' %}" class="back-text text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Retour à l’accueil
+              </a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const pwdField = document.getElementById('password'),
+        keypad   = document.getElementById('numeric-keypad');
+
+  pwdField.addEventListener('focus', () => {
+    renderKeypad();
+    keypad.classList.add('visible');
+  });
+
+  function renderKeypad() {
+    const digits = Array.from({length: 10}, (_, i) => i.toString());
+    for (let i = digits.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [digits[i], digits[j]] = [digits[j], digits[i]];
+    }
+
+    keypad.innerHTML = '';
+    digits.forEach(d => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'num-key';
+      btn.textContent = d;
+      btn.onclick = () => {
+        if (pwdField.value.length < 6) pwdField.value += d;
+      };
+      keypad.appendChild(btn);
+    });
+  }
+
+  // Retour & Effacer
+  document.getElementById('btn-back').addEventListener('click', () => {
+    pwdField.value = pwdField.value.slice(0, -1);
+  });
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    pwdField.value = '';
+  });
+
+  function togglePassword(id) {
+    const f = document.getElementById(id),
+          i = f.parentNode.querySelector('.btn-eye i');
+    if (f.type === 'password') {
+      f.type = 'text';
+      i.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+      f.type = 'password';
+      i.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+  }
+</script>
+
+<style>
+  :root {
+    --color-brown: #8B4513;
+    --color-beige: #F5F5DC;
+  }
+
+  .auth-page {
+    min-height: calc(100vh - 160px);
+    background: var(--color-beige);
+  }
+
+  .auth-card {
+    background: #fff;
+    width: 450px;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,.1);
+    margin: 0 auto;
+    color: var(--color-brown);
+  }
+
+  .auth-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--color-brown);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-icon i {
+    color: #fff;
+    font-size: 1.8rem;
+  }
+
+  .auth-title { font-size: 2rem; font-weight: 700; }
+  .auth-subtitle { font-weight: 500; }
+
+  .btn-eye {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-brown);
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  /* Clavier en grille 5×3 pleine largeur */
+  .numeric-keypad {
+    display: none;
+    width: 100%;
+    grid-template-columns: repeat(5, 1fr);
+    gap: .5rem;
+  }
+  .numeric-keypad.visible {
+    display: grid;
+  }
+  .num-key {
+    background: #fff;
+    border: 1px solid var(--color-brown);
+    border-radius: 8px;
+    color: var(--color-brown);
+    font-size: 1.1rem;
+    padding: .75rem 0;
+    text-align: center;
+    cursor: pointer;
+  }
+  .num-key:hover {
+    background: var(--color-brown);
+    color: #fff;
+    font-weight: bold;
+  }
+
+  /* Boutons Retour/Effacer alignés */
+  .func-buttons {
+    display: flex;
+    gap: .5rem;
+    width: 100%;
+  }
+  .func-buttons .key-func {
+    flex: 1;
+    background: #fff;
+    border: 1px solid var(--color-brown);
+    border-radius: 8px;
+    color: var(--color-brown);
+    font-size: 1.1rem;
+    padding: .75rem 0;
+    cursor: pointer;
+    text-align: center;
+  }
+  .func-buttons .key-func:hover {
+    background: var(--color-brown);
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .btn-orange {
+    {% comment %} background: linear-gradient(135deg, var(--color-orange), #ff8c00); {% endcomment %}
+    background: var(--color-orange);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-orange:hover {
+    {% comment %} background: linear-gradient(135deg, #ff8c00, var(--color-orange)); {% endcomment %}
+    background: var(--color-brown);
+    color:white;
+  }
+
+  .back-text {
+    color: var(--color-brown);
+    font-weight: 500;
+  }
+</style>
+{% endblock %}

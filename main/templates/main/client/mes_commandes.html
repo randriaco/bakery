@@ -1,0 +1,135 @@
+{% extends 'main/bases/base_client.html' %}
+{% load static %}
+
+{% block page_title %}Mes commandes{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  {# Alerte si des commandes sont déjà prêtes #}
+  {% if pretes_count %}
+    <div class="alert alert-success mb-4">
+      <i class="fas fa-check-circle me-2"></i>
+      Vous avez {{ pretes_count }} commande{{ pretes_count|pluralize }} prête{{ pretes_count|pluralize }} à être récupérée !
+    </div>
+  {% endif %}
+      
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 text-brown">
+              <i class="fas fa-shopping-bag me-2"></i>Historique de mes commandes
+            </h4>
+            <a href="{% url 'commander' %}" class="btn btn-orange">
+              <i class="fas fa-plus me-2"></i>Nouvelle commande
+            </a>
+          </div>
+        </div>
+        <div class="card-body">
+
+          {% if commandes %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>N° Commande</th>
+                    <th>Date</th>
+                    <th>Retrait prévu</th>
+                    <th>Montant</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for commande in commandes %}
+                    <tr>
+                      <td><strong>{{ commande.numero_commande }}</strong></td>
+                      <td>
+                        {{ commande.date_commande|date:"d/m/Y" }}<br>
+                        <small class="text-muted">{{ commande.date_commande|time:"H:i" }}</small>
+                      </td>
+                      <td>
+                        {{ commande.date_collecte|date:"d/m/Y" }}<br>
+                        <small class="text-muted">{{ commande.heure_collecte|time:"H:i" }}</small>
+                      </td>
+                      <td><strong class="text-orange">{{ commande.total }}€</strong></td>
+                      <td>
+                        <span class="badge bg-{{ commande.get_statut_display_class }}">
+                          {{ commande.get_statut_display }}
+                        </span>
+                      </td>  
+                      <td>
+                        <a href="{% url 'detail_commande' commande.numero_commande %}"
+                           class="btn btn-sm btn-outline-primary me-1"
+                           data-bs-toggle="tooltip"
+                           title="Voir le détail">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'telecharger_facture' commande.numero_commande %}"
+                           class="btn btn-sm btn-outline-secondary"
+                           data-bs-toggle="tooltip"
+                           title="Télécharger la facture">
+                          <i class="fas fa-download"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            {# Légende des statuts #}
+            <div class="mt-4">
+              <h6 class="text-muted">Légende des statuts :</h6>
+              <div class="d-flex flex-column gap-2">
+                <div>
+                  <span class="badge bg-info">Payée</span> Paiement confirmé
+                </div>
+                <div>
+                  <span class="badge bg-primary">En préparation</span> Commande en cours de préparation
+                </div>
+                <div>
+                  <span class="badge bg-success">Prête</span> Commande prête à être récupérée
+                </div>
+                <div>
+                  <span class="badge bg-secondary">Récupérée</span> Commande récupérée
+                </div>
+                <div>
+                  <span class="badge bg-danger">Annulée</span> Commande annulée
+                </div>
+              </div>
+            </div>
+
+          {% else %}
+            <div class="text-center py-5">
+              <i class="fas fa-shopping-basket fa-5x text-muted mb-4"></i>
+              <h4 class="text-muted mb-3">Aucune commande pour le moment</h4>
+              <p class="text-muted mb-4">
+                Commencez dès maintenant à commander nos délicieux produits !
+              </p>
+              <a href="{% url 'commander' %}" class="btn btn-orange btn-lg">
+                <i class="fas fa-shopping-cart me-2"></i>Commander maintenant
+              </a>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.forEach(function (el) {
+      new bootstrap.Tooltip(el);
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre compte personnel - {{ boulangerie.nom }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #8B4513;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -30px -30px 30px -30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .credentials-box {
+            background-color: #FAE6D8;
+            border: 2px solid #D86B1E;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .credentials-box h3 {
+            color: #8B4513;
+            margin-top: 0;
+        }
+        .credential-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .credential-label {
+            font-weight: bold;
+            color: #8B4513;
+        }
+        .credential-value {
+            color: #333;
+            background-color: #FFF5EA;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #D86B1E;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #ff8c00;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            background:#8B4513;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer-info {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bienvenue chez {{ boulangerie.nom }}</h1>
+        </div>
+        
+        <h2>Bonjour {{ user.first_name }} {{ user.last_name }},</h2>
+        
+        <p>Nous sommes heureux de vous informer que votre compte personnel pour <strong>{{ boulangerie.nom }}</strong> a été créé avec succès.</p>
+        
+        <div class="credentials-box">
+            <h3>🔐 Vos identifiants de connexion</h3>
+            
+            <div class="credential-item">
+                <div class="credential-label">Email (identifiant) :</div>
+                <div class="credential-value">{{ user.email }}</div>
+            </div>
+            
+            <div class="credential-item">
+                <div class="credential-label">Mot de passe temporaire :</div>
+                <div class="credential-value">{{ password }}</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="{{ site_url }}/connexion-pro/" class="button">Se connecter</a>
+        </div>
+        
+        <div class="warning">
+            <strong>⚠️ Important :</strong> Pour des raisons de sécurité, nous vous recommandons vivement de changer votre mot de passe lors de votre première connexion.
+        </div>
+        
+        <h3>Comment changer votre mot de passe ?</h3>
+        <ol>
+            <li>Connectez-vous avec les identifiants ci-dessus</li>
+            <li>Cliquez sur votre nom en haut à droite</li>
+            <li>Accédez à "Paramètres"</li>
+            <li>Changez votre mot de passe (6 chiffres)</li>
+        </ol>
+        
+        <h3>Vos responsabilités</h3>
+        <p>En tant que membre du personnel, vous aurez accès à :</p>
+        <ul>
+            <li>La liste des commandes à préparer</li>
+            <li>La gestion du statut des commandes</li>
+            <li>La visualisation des produits</li>
+        </ul>
+        
+        <p>Si vous avez des questions ou rencontrez des difficultés pour vous connecter, n'hésitez pas à contacter votre gérant.</p>
+        
+        <div class="footer">
+            <div class="footer-info"><strong>{{ boulangerie.nom }}</strong></div>
+            <div class="footer-info">{{ boulangerie.adresse }}</div>
+            <div class="footer-info">{{ boulangerie.code }} {{ boulangerie.ville }}</div>
+            <div class="footer-info">📞 {{ boulangerie.telephone }}</div>
+            <br>
+            <div class="footer-info" style="font-size: 12px; color: #999;">
+                Cet email contient des informations confidentielles. Si vous n'êtes pas le destinataire prévu, veuillez supprimer ce message.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

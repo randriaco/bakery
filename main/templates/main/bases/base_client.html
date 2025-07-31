@@ -9,10 +9,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{% static 'main/styles.css' %}" rel="stylesheet">
 </head>
-
 <body>
     <div class="layout-wrapper">
-        {% include 'main/partials/navbar_gerant.html' %}
+        {% include 'main/partials/navbar_client.html' %}
 
         <!-- Contenu principal -->
         <div class="main-content">
@@ -23,7 +22,7 @@
                 <!-- Menu utilisateur -->
                 <div class="user-menu dropdown">
                     <button class="btn btn-link dropdown-toggle text-brown" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-2"></i> Gérant
+                        <i class="fas fa-user-circle me-2"></i> Client
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Mon profil</a></li>

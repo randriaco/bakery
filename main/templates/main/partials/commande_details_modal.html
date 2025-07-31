@@ -1,0 +1,144 @@
+<div class="commande-details">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h5 class="mb-1">Commande n°{{ commande.numero_commande }}</h5>
+            <p class="text-muted mb-0">{{ commande.date_commande|date:"d/m/Y à H:i" }}</p>
+        </div>
+        <span class="badge bg-{{ commande.get_statut_display_class }} fs-6">
+            {{ commande.get_statut_display }}
+        </span>
+    </div>
+
+    <!-- Informations client -->
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-user me-2"></i>Informations client</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Nom :</strong> {{ commande.client.get_full_name }}</p>
+                    <p class="mb-0"><strong>Email :</strong> {{ commande.client.email }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Date retrait :</strong> {{ commande.date_collecte|date:"d/m/Y" }}</p>
+                    <p class="mb-0"><strong>Heure retrait :</strong> {{ commande.heure_collecte|time:"H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produits commandés -->
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-shopping-basket me-2"></i>Produits commandés</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th class="text-center">Qté</th>
+                            <th class="text-end">Prix unit.</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ligne in lignes %}
+                        <tr>
+                            <td>
+                                {{ ligne.nom_produit }}
+                                <small class="text-muted d-block">{{ ligne.categorie }}</small>
+                            </td>
+                            <td class="text-center">{{ ligne.quantite }}</td>
+                            <td class="text-end">{{ ligne.prix_unitaire }}€</td>
+                            <td class="text-end">{{ ligne.sous_total }}€</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total :</strong></td>
+                            <td class="text-end"><strong class="text-orange">{{ commande.total }}€</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    {% if commande.notes_client %}
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-comment me-2"></i>Notes du client</h6>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">{{ commande.notes_client }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Timeline -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-history me-2"></i>Historique</h6>
+        </div>
+        <div class="card-body">
+            <ul class="timeline-simple">
+                {% if commande.date_commande %}
+                <li>
+                    <strong>Commande passée :</strong> 
+                    {{ commande.date_commande|date:"d/m/Y à H:i" }}
+                </li>
+                {% endif %}
+                
+                {% if commande.date_paiement %}
+                <li>
+                    <strong>Paiement confirmé :</strong> 
+                    {{ commande.date_paiement|date:"d/m/Y à H:i" }}
+                </li>
+                {% endif %}
+                
+                {% if commande.date_preparation %}
+                <li>
+                    <strong>Préparation commencée :</strong> 
+                    {{ commande.date_preparation|date:"d/m/Y à H:i" }}
+                </li>
+                {% endif %}
+                
+                {% if commande.date_prete %}
+                <li>
+                    <strong>Commande prête :</strong> 
+                    {{ commande.date_prete|date:"d/m/Y à H:i" }}
+                </li>
+                {% endif %}
+                
+                {% if commande.date_recuperation %}
+                <li>
+                    <strong>Commande récupérée :</strong> 
+                    {{ commande.date_recuperation|date:"d/m/Y à H:i" }}
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-simple {
+    list-style: none;
+    padding-left: 0;
+}
+
+.timeline-simple li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.timeline-simple li:last-child {
+    border-bottom: none;
+}
+</style>

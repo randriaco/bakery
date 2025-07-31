@@ -1,0 +1,441 @@
+{% extends 'main/bases/base_client.html' %}
+
+{% load static %}
+
+{% block page_title %}Commande n°{{ commande.numero_commande }}{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard_client' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mes_commandes' %}">Mes commandes</a></li>
+                    <li class="breadcrumb-item active">{{ commande.numero_commande }}</li>
+                </ol>
+            </nav>
+
+            <!-- En-tête commande -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="text-brown mb-2">
+                                <i class="fas fa-receipt me-2"></i>
+                                Commande n°{{ commande.numero_commande }}
+                            </h3>
+                            <p class="text-muted mb-0">
+                                Passée le {{ commande.date_commande|date:"d/m/Y à H:i" }}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <span id="statutBadge" class="badge bg-{{ commande.get_statut_display_class }} fs-6 px-3 py-2">
+                                {{ commande.get_statut_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Détails de la commande -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 text-brown">Produits commandés</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Produit</th>
+                                            <th class="text-center">Quantité</th>
+                                            <th class="text-end">Prix unitaire</th>
+                                            <th class="text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ligne in commande.lignes.all %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ ligne.nom_produit }}</strong><br>
+                                                    <small class="text-muted">{{ ligne.categorie }}</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">{{ ligne.quantite }}</td>
+                                            <td class="text-end">{{ ligne.prix_unitaire }}€</td>
+                                            <td class="text-end">{{ ligne.sous_total }}€</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3" class="text-end">Sous-total :</td>
+                                            <td class="text-end"><strong>{{ commande.sous_total }}€</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-end">Frais de service :</td>
+                                            <td class="text-end">{{ commande.frais_service }}€</td>
+                                        </tr>
+                                        <tr class="table-active">
+                                            <td colspan="3" class="text-end"><h5 class="mb-0">Total :</h5></td>
+                                            <td class="text-end"><h5 class="mb-0 text-orange">{{ commande.total }}€</h5></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline de statut -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 text-brown">Suivi de la commande</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline" id="timeline">
+                                <!-- Le timeline sera mis à jour dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Infos de retrait -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-brown text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>Informations de retrait
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-brown">Date et heure</h6>
+                                <p class="mb-0">
+                                    <strong>{{ commande.date_collecte|date:"l d F Y" }}</strong><br>
+                                    à <strong>{{ commande.heure_collecte|time:"H:i" }}</strong>
+                                </p>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div>
+                                <h6 class="text-brown">Adresse de retrait</h6>
+                                <p class="mb-0">
+                                    <strong>{{ boulangerie.nom }}</strong><br>
+                                    {{ boulangerie.adresse }}<br>
+                                    {{ boulangerie.code }} {{ boulangerie.ville }}<br>
+                                    <i class="fas fa-phone me-1"></i>{{ boulangerie.telephone }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions et notifications -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0 text-brown">Actions</h5>
+                        </div>
+                        <div class="card-body" id="actionsCard">
+                            <!-- Le contenu sera mis à jour dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'annulation -->
+<div class="modal fade" id="modalAnnuler" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Annuler la commande</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir annuler cette commande ?</p>
+                <p class="text-muted">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non, conserver</button>
+                <form method="POST" action="{% url 'annuler_commande' commande.numero_commande %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Oui, annuler</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Timeline CSS */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 30px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.timeline-item.completed {
+    opacity: 1;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 24px;
+    height: calc(100% + 15px);
+    width: 2px;
+    background-color: #e0e0e0;
+    transition: background-color 0.3s ease;
+}
+
+.timeline-item.completed:not(:last-child)::before {
+    background-color: #28a745;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 3px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.timeline-item.completed .timeline-marker {
+    background-color: #28a745;
+    border-color: #28a745;
+    animation: pulse 1s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.timeline-item.completed .timeline-content h6 {
+    color: #28a745;
+}
+
+/* Notification animation */
+.notification-pulse {
+    animation: notificationPulse 2s infinite;
+}
+
+@keyframes notificationPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+</style>
+
+<script>
+// Configuration initiale
+const commandeId = '{{ commande.id }}';
+const numeroCommande = '{{ commande.numero_commande }}';
+let currentStatut = '{{ commande.statut }}';
+
+// Fonction pour mettre à jour le statut et le timeline
+function updateStatutDisplay(data) {
+    // Mettre à jour le badge de statut
+    const badge = document.getElementById('statutBadge');
+    badge.className = `badge bg-${data.statut_class} fs-6 px-3 py-2`;
+    badge.textContent = data.statut_display;
+    
+    // Mettre à jour le timeline
+    updateTimeline(data);
+    
+    // Mettre à jour les actions
+    updateActions(data);
+    
+    // Si le statut a changé, afficher une notification
+    if (data.statut !== currentStatut) {
+        showNotification(data.statut);
+        currentStatut = data.statut;
+    }
+}
+
+function updateTimeline(data) {
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = `
+        <!-- Commande passée -->
+        <div class="timeline-item ${data.date_commande ? 'completed' : ''}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <h6>Commande passée</h6>
+                <p class="text-muted mb-0">${data.date_commande || ''}</p>
+            </div>
+        </div>
+        
+        <!-- Paiement confirmé -->
+        <div class="timeline-item ${data.date_paiement ? 'completed' : ''}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <h6>Paiement confirmé</h6>
+                <p class="text-muted mb-0">${data.date_paiement || ''}</p>
+            </div>
+        </div>
+        
+        <!-- En préparation -->
+        <div class="timeline-item ${data.date_preparation ? 'completed' : ''}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <h6>En préparation</h6>
+                <p class="text-muted mb-0">${data.date_preparation || ''}</p>
+            </div>
+        </div>
+        
+        <!-- Prête -->
+        <div class="timeline-item ${data.date_prete ? 'completed' : ''}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <h6>Prête</h6>
+                <p class="text-muted mb-0">${data.date_prete || ''}</p>
+            </div>
+        </div>
+        
+        <!-- Récupérée -->
+        <div class="timeline-item ${data.date_recuperation ? 'completed' : ''}">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <h6>Récupérée</h6>
+                <p class="text-muted mb-0">${data.date_recuperation || ''}</p>
+            </div>
+        </div>
+    `;
+}
+
+function updateActions(data) {
+    const actionsCard = document.getElementById('actionsCard');
+    let content = `
+        <a href="/commande/${numeroCommande}/facture/" 
+           class="btn btn-outline-secondary w-100 mb-2">
+            <i class="fas fa-download me-2"></i>Télécharger la facture
+        </a>
+    `;
+    
+    if (data.statut === 'payee' || data.statut === 'en_preparation') {
+        content += `
+            <button class="btn btn-outline-danger w-100" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#modalAnnuler">
+                <i class="fas fa-times me-2"></i>Annuler la commande
+            </button>
+        `;
+    } else if (data.statut === 'prete') {
+        content += `
+            <div class="alert alert-success mb-0 notification-pulse">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Votre commande est prête !</strong><br>
+                Vous avez reçu un code par email.<br>
+                Présentez-vous à la boulangerie pour la récupérer.
+            </div>
+        `;
+    } else if (data.statut === 'recuperee') {
+        content += `
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-box-open me-2"></i>
+                Commande récupérée avec succès !
+            </div>
+        `;
+    }
+    
+    actionsCard.innerHTML = content;
+}
+
+function showNotification(statut) {
+    let message = '';
+    let type = 'info';
+    
+    switch(statut) {
+        case 'en_preparation':
+            message = 'Votre commande est maintenant en préparation !';
+            type = 'warning';
+            break;
+        case 'prete':
+            message = 'Votre commande est prête ! Vérifiez votre email pour le code de récupération.';
+            type = 'success';
+            break;
+        case 'recuperee':
+            message = 'Commande récupérée avec succès !';
+            type = 'success';
+            break;
+    }
+    
+    if (message) {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+            <i class="fas fa-bell me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        // Jouer un son de notification (optionnel)
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+        audio.play().catch(() => {}); // Ignorer les erreurs si le son ne peut pas être joué
+        
+        setTimeout(() => alert.remove(), 5000);
+    }
+}
+
+// Fonction pour récupérer le statut actuel
+function checkStatut() {
+    fetch(`/api/commande/${commandeId}/statut/`)
+        .then(response => response.json())
+        .then(data => {
+            updateStatutDisplay(data);
+        })
+        .catch(error => {
+            console.error('Erreur lors de la vérification du statut:', error);
+        });
+}
+
+// Vérifier le statut toutes les 5 secondes
+setInterval(checkStatut, 5000);
+
+// Initialiser le timeline au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    // Données initiales
+    const initialData = {
+        statut: '{{ commande.statut }}',
+        statut_display: '{{ commande.get_statut_display }}',
+        statut_class: '{{ commande.get_statut_display_class }}',
+        date_commande: '{{ commande.date_commande|date:"d/m/Y à H:i" }}',
+        date_paiement: {% if commande.date_paiement %}'{{ commande.date_paiement|date:"d/m/Y à H:i" }}'{% else %}null{% endif %},
+        date_preparation: {% if commande.date_preparation %}'{{ commande.date_preparation|date:"d/m/Y à H:i" }}'{% else %}null{% endif %},
+        date_prete: {% if commande.date_prete %}'{{ commande.date_prete|date:"d/m/Y à H:i" }}'{% else %}null{% endif %},
+        date_recuperation: {% if commande.date_recuperation %}'{{ commande.date_recuperation|date:"d/m/Y à H:i" }}'{% else %}null{% endif %}
+    };
+    
+    updateStatutDisplay(initialData);
+});
+</script>
+
+{% endblock %}

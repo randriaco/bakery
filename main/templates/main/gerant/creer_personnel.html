@@ -1,0 +1,546 @@
+{% extends 'main/bases/base_gerant.html' %}
+
+{% block title %}Créer un personnel - {{ boulangerie.nom }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulaire de création -->
+            <div class="card">
+                <div class="card-header bg-brown text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        <strong>Créer un nouveau personnel</strong>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Erreurs générales du formulaire -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- Nom -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.nom.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.nom.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.nom }}
+                                {% if form.nom.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.nom.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Prénom -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.prenom.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.prenom.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.prenom }}
+                                {% if form.prenom.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.prenom.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.email.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Confirmation Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email_confirm.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.email_confirm.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.email_confirm }}
+                                {% if form.email_confirm.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email_confirm.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.telephone.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.telephone.label }}
+                                </label>
+                                {{ form.telephone }}
+                                <small class="form-text text-muted">Optionnel - Format : 10 chiffres</small>
+                                {% if form.telephone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.telephone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="row">
+                            <!-- Mot de passe -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.password.label }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="position-relative">
+                                    {{ form.password }}
+                                    <button type="button" class="btn-eye" onclick="togglePassword('{{ form.password.id_for_label }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">6 chiffres exactement</small>
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Confirmation Mot de passe -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.password_confirm.id_for_label }}" class="form-label text-brown fw-bold">
+                                    {{ form.password_confirm.label }} <span class="text-danger">*</span>
+                                </label>
+                                <div class="position-relative">
+                                    {{ form.password_confirm }}
+                                    <button type="button" class="btn-eye" onclick="togglePassword('{{ form.password_confirm.id_for_label }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                {% if form.password_confirm.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password_confirm.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Information -->
+                        <div class="alert alert-info bg-beige border-0 mb-4">
+                            <h6 class="text-brown fw-bold mb-2">
+                                <i class="fas fa-info-circle me-2"></i>Information importante
+                            </h6>
+                            <ul class="mb-0 small text-brown">
+                                <li>Le mot de passe sera envoyé par email au nouveau personnel</li>
+                                <li>Le personnel devra changer son mot de passe lors de sa première connexion</li>
+                                <li>L'email servira d'identifiant de connexion</li>
+                            </ul>
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'dashboard_gerant' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-orange">
+                                <i class="fas fa-user-plus me-2"></i>
+                                <strong>Créer le personnel</strong>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste du personnel existant avec cards responsive -->
+            <div class="mt-5">
+                <h4 class="text-brown mb-4">
+                    <i class="fas fa-users me-2"></i>
+                    Personnel existant
+                </h4>
+                
+                <!-- Conteneur avec largeur maximale pour éviter cards trop larges -->
+                <div class="personnel-container">
+                
+                {% if personnel_list %}
+                    <div class="row">
+                        {% for membre in personnel_list %}
+                            <div class="col-12 col-md-6 col-xl-6 mb-4">
+                                <div class="card h-100 personnel-card shadow-sm">
+                                    <div class="card-header bg-beige">
+                                        <h5 class="mb-0 text-brown d-flex align-items-center">
+                                            <i class="fas fa-user-tie me-2"></i>
+                                            {{ membre.get_full_name|default:"Sans nom" }}
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="personnel-info">
+                                            <div class="info-item mb-3">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="fas fa-envelope text-orange me-3 mt-1"></i>
+                                                    <div>
+                                                        <strong class="d-block mb-1">Email :</strong>
+                                                        <span class="text-muted">{{ membre.email }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="info-item mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-phone text-orange me-3"></i>
+                                                    <div>
+                                                        <strong>Téléphone :</strong>
+                                                        <span class="text-muted ms-2">{{ membre.profile.telephone|default:"Non renseigné" }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="info-item mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-calendar-alt text-orange me-3"></i>
+                                                    <div>
+                                                        <strong>Membre depuis :</strong>
+                                                        <span class="text-muted ms-2">{{ membre.date_joined|date:"d/m/Y" }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="info-item">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="fas fa-clock text-orange me-3 mt-1"></i>
+                                                    <div>
+                                                        <strong class="d-block mb-1">Dernière connexion :</strong>
+                                                        <span class="text-muted">
+                                                            {% if membre.last_login %}
+                                                                {{ membre.last_login|date:"d/m/Y à H:i" }}
+                                                            {% else %}
+                                                                Jamais connecté
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-light border-top">
+                                        <div class="d-flex justify-content-between gap-2">
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-primary flex-fill"
+                                                    onclick="modifierPersonnel({{ membre.id }})"
+                                                    data-bs-toggle="tooltip" 
+                                                    title="Modifier les informations">
+                                                <i class="fas fa-edit me-1"></i> Modifier
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger flex-fill"
+                                                    onclick="confirmerSuppression({{ membre.id }}, '{{ membre.get_full_name }}')"
+                                                    data-bs-toggle="tooltip" 
+                                                    title="Supprimer ce personnel">
+                                                <i class="fas fa-trash-alt me-1"></i> Supprimer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info bg-light border-0">
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun personnel enregistré</h5>
+                            <p class="text-muted">Utilisez le formulaire ci-dessus pour créer votre premier compte personnel.</p>
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+            
+            <!-- Modal de confirmation de suppression -->
+            <div class="modal fade" id="modalSuppression" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Confirmer la suppression
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Êtes-vous sûr de vouloir supprimer le compte de <strong id="nomPersonnelSupprimer"></strong> ?</p>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Cette action est irréversible. Le personnel ne pourra plus se connecter.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </button>
+                            <button type="button" class="btn btn-danger" id="btnConfirmerSuppression">
+                                <i class="fas fa-trash-alt me-2"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Initialiser les tooltips Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// Fonction pour modifier un personnel
+function modifierPersonnel(personnelId) {
+    // Rediriger vers la page de modification
+    window.location.href = `/gerant/modifier-personnel/${personnelId}/`;
+}
+
+// Variables pour la suppression
+let personnelIdASupprimer = null;
+
+// Fonction pour afficher la modal de confirmation
+function confirmerSuppression(personnelId, nomPersonnel) {
+    personnelIdASupprimer = personnelId;
+    document.getElementById('nomPersonnelSupprimer').textContent = nomPersonnel;
+    const modal = new bootstrap.Modal(document.getElementById('modalSuppression'));
+    modal.show();
+}
+
+// Gestion du bouton de confirmation de suppression
+document.getElementById('btnConfirmerSuppression')?.addEventListener('click', function() {
+    if (personnelIdASupprimer) {
+        // Créer un formulaire pour la suppression
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/gerant/supprimer-personnel/${personnelIdASupprimer}/`;
+        
+        // Ajouter le token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        // Soumettre le formulaire
+        document.body.appendChild(form);
+        form.submit();
+    }
+});
+</script>
+
+<style>
+/* Styles personnalisés */
+.card-header.bg-brown {
+    background-color: var(--color-brown) !important;
+}
+
+.btn-orange {
+    background-color: var(--color-orange) !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.btn-orange:hover {
+    background-color: var(--color-dark-orange) !important;
+    transform: translateY(-2px);
+}
+
+.text-brown {
+    color: var(--color-brown) !important;
+}
+
+.text-orange {
+    color: var(--color-orange) !important;
+}
+
+.bg-beige {
+    background-color: var(--color-beige) !important;
+}
+
+.form-control:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(216, 107, 30, 0.25);
+}
+
+.position-relative {
+    position: relative;
+}
+
+.btn-eye {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--color-brown);
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 10;
+}
+
+.btn-eye:hover {
+    color: var(--color-orange);
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Styles pour les cards personnel */
+.personnel-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    height: 100%;
+}
+
+.personnel-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.personnel-card .card-header {
+    border-bottom: 2px solid var(--color-orange);
+    padding: 1.2rem;
+}
+
+.personnel-card .card-body {
+    padding: 1.5rem;
+}
+
+.personnel-card .card-footer {
+    padding: 1rem;
+}
+
+.personnel-info .info-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.personnel-info .info-item:last-child {
+    border-bottom: none;
+}
+
+.personnel-info strong {
+    color: var(--color-brown);
+    font-size: 0.9rem;
+}
+
+.personnel-info .text-muted {
+    font-size: 0.95rem;
+}
+
+/* Boutons dans les cards */
+.btn-outline-primary {
+    color: var(--color-brown);
+    border-color: var(--color-brown);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-brown);
+    border-color: var(--color-brown);
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    transform: scale(1.02);
+}
+
+/* Ajustements pour grandes cards */
+@media (min-width: 1200px) {
+    .personnel-card {
+        min-height: 320px;
+    }
+    
+    .personnel-info {
+        font-size: 1rem;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .personnel-card .card-footer .btn {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.75rem;
+    }
+    
+    .personnel-info strong {
+        font-size: 0.85rem;
+    }
+    
+    .personnel-info .text-muted {
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation pour l'alerte */
+.alert-info.bg-light {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Conteneur pour limiter la largeur sur très grands écrans */
+.personnel-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+</style>
+{% endblock %}

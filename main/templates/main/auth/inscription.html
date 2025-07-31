@@ -1,0 +1,673 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block title %}Inscription - {{ boulangerie.nom|default:"Pain Doré" }}{% endblock %}
+
+{% block content %}
+
+<div class="auth-page py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="auth-card">
+                    <div class="auth-header text-center mb-4">
+                        <div class="auth-icon mx-auto mb-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h2 class="auth-title">Inscription</h2>
+                        <p class="auth-subtitle text-muted">Créez votre compte client</p>
+                    </div>
+                    
+                    <form id="form-inscription" class="auth-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="nom" 
+                                       placeholder="Nom" required>
+                                <label for="nom">
+                                    <i class="fas fa-user me-2"></i>Nom
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="prenom" 
+                                       placeholder="Prénom" required>
+                                <label for="prenom">
+                                    <i class="fas fa-user me-2"></i>Prénom
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="telephone" 
+                                       placeholder="Téléphone" required>
+                                <label for="telephone">
+                                    <i class="fas fa-phone me-2"></i>Téléphone
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" 
+                                       placeholder="Email" required>
+                                <label for="email">
+                                    <i class="fas fa-envelope me-2"></i>Adresse email
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email-confirm" 
+                                       placeholder="Confirmer Email" required>
+                                <label for="email-confirm">
+                                    <i class="fas fa-envelope me-2"></i>Confirmer l'email
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Section des exigences du mot de passe -->
+                        <div class="password-requirements mb-3">
+                            <h6 class="text-brown fw-bold mb-2">Votre mot de passe doit contenir :</h6>
+                            <div class="requirement" id="req-length">
+                                <i class="fas fa-times-circle"></i>
+                                <span>Exactement 6 chiffres</span>
+                            </div>
+                            <div class="requirement" id="req-match">
+                                <i class="fas fa-times-circle"></i>
+                                <span>Les deux mots de passe doivent être identiques</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating position-relative">
+                                <input type="password" class="form-control password-field" 
+                                       id="password-inscription" placeholder="Mot de passe" 
+                                       readonly required maxlength="6">
+                                <label for="password-inscription">
+                                    <i class="fas fa-lock me-2"></i>Mot de passe
+                                </label>
+                                <button type="button" class="btn-eye" onclick="togglePassword('password-inscription')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating position-relative">
+                                <input type="password" class="form-control password-field" 
+                                       id="password-confirm" placeholder="Confirmer mot de passe" 
+                                       readonly required maxlength="6">
+                                <label for="password-confirm">
+                                    <i class="fas fa-lock me-2"></i>Confirmer le mot de passe
+                                </label>
+                                <button type="button" class="btn-eye" onclick="togglePassword('password-confirm')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="virtual-keyboard mb-4" data-target="password-inscription,password-confirm"></div>
+                        
+                        <button type="submit" class="btn btn-orange w-100 py-3 mb-4" disabled>
+                            <i class="fas fa-user-plus me-2"></i>Créer mon compte
+                        </button>
+                        
+                        <!-- Liens sous le bouton -->
+                        <div class="auth-links text-center">
+                            <a href="{% url 'connexion' %}" class="text-decoration-none">
+                                <i class="fas fa-sign-in-alt me-1"></i>Déjà un compte ? Se connecter
+                            </a>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{% url 'accueil' %}" class="back-link text-decoration-none">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertes pour les messages -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+    <div id="alert-container"></div>
+</div>
+
+<script>
+    let currentPasswordField = null;
+    
+    // Initialiser les claviers virtuels
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeKeyboards();
+        
+        // Gérer la soumission des formulaires
+        document.getElementById('form-inscription').addEventListener('submit', handleInscription);
+        
+        // Valider les mots de passe en temps réel
+        document.getElementById('password-inscription').addEventListener('input', validatePasswords);
+        document.getElementById('password-confirm').addEventListener('input', validatePasswords);
+        
+        // Valider les emails en temps réel
+        document.getElementById('email').addEventListener('input', validateForm);
+        document.getElementById('email-confirm').addEventListener('input', validateForm);
+    });
+    
+    function initializeKeyboards() {
+        document.querySelectorAll('.virtual-keyboard').forEach(keyboard => {
+            const targets = keyboard.dataset.target.split(',');
+            
+            // Générer les chiffres aléatoires
+            const numbers = shuffleArray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            
+            // Créer le clavier
+            let html = '<div class="keyboard-grid">';
+            numbers.forEach((num, index) => {
+                if (index === 5) html += '</div><div class="keyboard-grid mt-2">';
+                html += `<button type="button" class="key-btn" onclick="addDigit('${num}', '${keyboard.dataset.target}')">${num}</button>`;
+            });
+            html += '</div>';
+            
+            // Ajouter les boutons d'action
+            html += `
+                <div class="keyboard-actions mt-2">
+                    <button type="button" class="key-btn key-clear" onclick="clearPassword('${keyboard.dataset.target}')">
+                        <i class="fas fa-times"></i> Effacer
+                    </button>
+                    <button type="button" class="key-btn key-backspace" onclick="backspace('${keyboard.dataset.target}')">
+                        <i class="fas fa-backspace"></i>
+                    </button>
+                </div>
+            `;
+            
+            keyboard.innerHTML = html;
+            
+            // Gérer le focus des champs
+            targets.forEach(target => {
+                const field = document.getElementById(target);
+                if (field) {
+                    field.addEventListener('focus', () => {
+                        currentPasswordField = target;
+                        keyboard.style.display = 'block';
+                    });
+                    
+                    field.addEventListener('blur', () => {
+                        setTimeout(() => {
+                            if (!keyboard.contains(document.activeElement)) {
+                                keyboard.style.display = 'none';
+                            }
+                        }, 200);
+                    });
+                }
+            });
+        });
+    }
+    
+    function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+    
+    function addDigit(digit, targets) {
+        const targetArray = targets.split(',');
+        targetArray.forEach(target => {
+            if (currentPasswordField === target) {
+                const field = document.getElementById(target);
+                // Ne pas dépasser 6 chiffres
+                if (field.value.length < 6) {
+                    field.value += digit;
+                    validatePasswords();
+                    validateForm();
+                }
+            }
+        });
+    }
+    
+    function clearPassword(targets) {
+        const targetArray = targets.split(',');
+        targetArray.forEach(target => {
+            if (currentPasswordField === target) {
+                document.getElementById(target).value = '';
+                validatePasswords();
+                validateForm();
+            }
+        });
+    }
+    
+    function backspace(targets) {
+        const targetArray = targets.split(',');
+        targetArray.forEach(target => {
+            if (currentPasswordField === target) {
+                const field = document.getElementById(target);
+                field.value = field.value.slice(0, -1);
+                validatePasswords();
+                validateForm();
+            }
+        });
+    }
+    
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const button = field.nextElementSibling.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    
+    function validatePasswords() {
+        const password = document.getElementById('password-inscription').value;
+        const confirmPassword = document.getElementById('password-confirm').value;
+        
+        let isValid = true;
+        
+        // Validation longueur (exactement 6 chiffres)
+        const lengthReq = document.getElementById('req-length');
+        if (password.length === 6 && /^\d+$/.test(password)) {
+            lengthReq.classList.add('valid');
+            lengthReq.classList.remove('invalid');
+            lengthReq.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            lengthReq.classList.remove('valid');
+            lengthReq.classList.add('invalid');
+            lengthReq.querySelector('i').className = 'fas fa-times-circle';
+            isValid = false;
+        }
+        
+        // Validation correspondance
+        const matchReq = document.getElementById('req-match');
+        if (confirmPassword && password === confirmPassword) {
+            matchReq.classList.add('valid');
+            matchReq.classList.remove('invalid');
+            matchReq.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            matchReq.classList.remove('valid');
+            matchReq.classList.add('invalid');
+            matchReq.querySelector('i').className = 'fas fa-times-circle';
+            if (confirmPassword) {
+                isValid = false;
+            }
+        }
+        
+        return isValid && confirmPassword && password === confirmPassword;
+    }
+    
+    function validateForm() {
+        const email = document.getElementById('email').value;
+        const emailConfirm = document.getElementById('email-confirm').value;
+        const nom = document.getElementById('nom').value;
+        const prenom = document.getElementById('prenom').value;
+        const telephone = document.getElementById('telephone').value;
+        const submitBtn = document.querySelector('button[type="submit"]');
+        
+        const passwordsValid = validatePasswords();
+        const emailsMatch = email && emailConfirm && email === emailConfirm;
+        const allFieldsFilled = nom && prenom && telephone && email && emailConfirm;
+        
+        submitBtn.disabled = !(passwordsValid && emailsMatch && allFieldsFilled);
+    }
+    
+    // Afficher les alertes
+    function showAlert(message, type = 'danger') {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show shadow" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.getElementById('alert-container').innerHTML = alertHtml;
+        
+        // Auto-fermer après 5 secondes
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+    
+    // Gérer l'inscription
+    function handleInscription(e) {
+        e.preventDefault();
+        
+        // Validation finale
+        const password = document.getElementById('password-inscription').value;
+        const confirmPassword = document.getElementById('password-confirm').value;
+        const email = document.getElementById('email').value;
+        const emailConfirm = document.getElementById('email-confirm').value;
+        
+        // Vérifier les mots de passe
+        if (password.length !== 6 || !/^\d+$/.test(password)) {
+            showAlert('Le mot de passe doit contenir exactement 6 chiffres');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showAlert('Les mots de passe ne correspondent pas');
+            return;
+        }
+        
+        // Vérifier les emails
+        if (email !== emailConfirm) {
+            showAlert('Les adresses email ne correspondent pas');
+            return;
+        }
+        
+        const formData = new FormData(e.target);
+        formData.append('nom', document.getElementById('nom').value);
+        formData.append('prenom', document.getElementById('prenom').value);
+        formData.append('telephone', document.getElementById('telephone').value);
+        formData.append('email', email);
+        formData.append('email_confirm', emailConfirm);
+        formData.append('password', password);
+        formData.append('password_confirm', confirmPassword);
+        
+        // Désactiver le bouton pendant l'envoi
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Inscription...';
+        
+        fetch('/ajax/inscription/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Inscription réussie ! Redirection vers la vérification...', 'success');
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 1000);
+            } else {
+                if (data.errors) {
+                    let errorMsg = '<ul class="mb-0">';
+                    for (let field in data.errors) {
+                        errorMsg += `<li>${data.errors[field]}</li>`;
+                    }
+                    errorMsg += '</ul>';
+                    showAlert(errorMsg);
+                } else {
+                    showAlert(data.error);
+                }
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Créer mon compte';
+            }
+        })
+        .catch(error => {
+            showAlert('Erreur lors de l\'inscription. Veuillez réessayer.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Créer mon compte';
+        });
+    }
+    
+    // Valider tous les champs au chargement
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', validateForm);
+    });
+</script>
+
+<style>
+/* Variables CSS */
+:root {
+    --color-brown: #8B4513;
+    --color-orange: #FF8C00;
+    --color-beige: #F5F5DC;
+    --shadow-standard: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Page d'authentification */
+.auth-page {
+    min-height: calc(100vh - 160px);
+    background-color: var(--color-beige);
+}
+
+.auth-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-standard);
+    border: 1px solid #e9ecef;
+}
+
+/* En-tête */
+.auth-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-orange), #FFA500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-brown);
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    font-size: 1.1rem;
+}
+
+/* Formulaires */
+.form-floating > .form-control {
+    height: 60px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.25);
+}
+
+.form-floating > label {
+    color: var(--color-brown);
+    font-weight: 500;
+}
+
+/* Requirements de mot de passe */
+.password-requirements {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.8rem;
+    font-size: 0.85rem;
+}
+
+.requirement {
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+}
+
+.requirement:last-child {
+    margin-bottom: 0;
+}
+
+.requirement i {
+    width: 18px;
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.requirement.valid i {
+    color: #28a745;
+}
+
+.requirement.invalid i {
+    color: #dc3545;
+}
+
+/* Boutons */
+.btn-orange {
+    background: linear-gradient(135deg, var(--color-orange), #ff8c00);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-orange:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ff8c00, var(--color-orange));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+}
+
+.btn-orange:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-eye {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-brown);
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 5;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-eye:hover {
+    background: rgba(139, 69, 19, 0.1);
+    color: var(--color-orange);
+}
+
+/* Liens d'authentification */
+.auth-links a {
+    color: var(--color-brown);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.auth-links a:hover {
+    color: var(--color-orange);
+}
+
+.back-link {
+    color: var(--color-brown);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-orange);
+}
+
+/* Clavier virtuel */
+.virtual-keyboard {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+    border: 1px solid #e9ecef;
+}
+
+.keyboard-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.keyboard-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.key-btn {
+    background: var(--color-brown);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.key-btn:hover {
+    background: #5a4037;
+    transform: translateY(-1px);
+}
+
+.key-clear {
+    background: var(--color-orange);
+}
+
+.key-clear:hover {
+    background: #ff8c00;
+}
+
+.key-backspace {
+    background: #dc3545;
+}
+
+.key-backspace:hover {
+    background: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .auth-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .auth-title {
+        font-size: 1.8rem;
+    }
+    
+    .keyboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+</style>
+{% endblock %}

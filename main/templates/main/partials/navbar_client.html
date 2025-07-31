@@ -1,0 +1,101 @@
+{# main/templates/main/partials/navbar_client.html #}
+{% load static %}
+
+<!-- Bouton Menu Burger -->
+<button class="menu-toggle" id="menuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+
+  <!-- Info boulangerie -->
+  <div class="boulangerie-info">
+    <h5>
+      <i class="fas fa-store"></i>
+      {{ boulangerie.nom|default:"Pain Doré" }}
+    </h5>
+    <p>
+      <i class="fas fa-map-marker-alt"></i>
+      {{ boulangerie.adresse|default:"123 rue Pierre Brossolette" }}
+    </p>
+    <p>
+      <i class="fas fa-city"></i>
+      {{ boulangerie.code|default:"94200" }}
+      {{ boulangerie.ville|default:"Athis Mons" }}
+    </p>
+    <p>
+      <i class="fas fa-phone"></i>
+      {{ boulangerie.telephone|default:"0123456789" }}
+    </p>
+  </div>
+
+  <!-- Menu navigation -->
+  <div class="nav flex-column">
+
+    <a
+      href="{% url 'dashboard_client' %}"
+      class="nav-link {% if request.resolver_match.url_name == 'dashboard_client' %}active{% endif %}"
+    >
+      <i class="fas fa-tachometer-alt me-2"></i>
+      Tableau de bord
+    </a>
+
+    <a
+      href="{% url 'commander' %}"
+      class="nav-link {% if request.resolver_match.url_name == 'commander' %}active{% endif %}"
+    >
+      <i class="fas fa-shopping-basket me-2"></i>
+      Commander
+    </a>
+
+    <a
+      href="{% url 'mes_commandes' %}"
+      class="nav-link {% if request.resolver_match.url_name == 'mes_commandes' or request.resolver_match.url_name == 'detail_commande' %}active{% endif %}"
+    >
+      <i class="fas fa-shopping-cart me-2"></i>
+      Mes Commandes
+
+      {# Badge “prêtes” si pretes_count > 0 #}
+      {% if pretes_count %}
+        <span class="badge bg-success ms-2">
+          Vous avez {{ pretes_count }} prête{{ pretes_count|pluralize }}
+        </span>
+      {% endif %}
+    </a>
+
+    <a href="#" class="nav-link">
+      <i class="fas fa-user-tie me-2"></i>
+      Mon Compte
+    </a>
+
+    <a href="#" class="nav-link">
+      <i class="fas fa-award me-2"></i>
+      Fidélité
+    </a>
+
+    <a href="#" class="nav-link">
+      <i class="fas fa-envelope me-2"></i>
+      Contact
+    </a>
+
+    <hr class="my-3">
+
+    <a
+      href="{% url 'deconnexion' %}"
+      class="nav-link text-danger"
+    >
+      <i class="fas fa-sign-out-alt me-2"></i>
+      Déconnexion
+    </a>
+
+  </div>
+</nav>
+
+<style>
+  /* Style pour le badge dans le menu */
+  .sidebar .nav-link .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+</style>

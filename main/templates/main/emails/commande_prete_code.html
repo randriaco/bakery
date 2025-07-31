@@ -1,0 +1,157 @@
+<!-- templates/main/emails/commande_prete_code.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .code-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #28a745;
+            letter-spacing: 10px;
+            margin: 10px 0;
+        }
+        .info-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥖 Votre commande est prête !</h1>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour {{ commande.client.get_full_name }},</p>
+            
+            <p style="font-size: 18px; color: #28a745;">
+                <strong>Excellente nouvelle !</strong> Votre commande #{{ commande.numero_commande }} 
+                est prête et vous attend.
+            </p>
+            
+            <div class="code-box">
+                <p style="margin: 0;">Votre code de récupération :</p>
+                <div class="code">{{ commande.code_recuperation }}</div>
+                <p style="margin: 0; font-size: 14px; color: #666;">
+                    Présentez ce code à la boulangerie
+                </p>
+            </div>
+            
+            <div class="info-box">
+                <h3 style="margin-top: 0;">📍 Informations de retrait</h3>
+                <p style="margin: 5px 0;">
+                    <strong>Heure de retrait prévue :</strong> {{ commande.heure_collecte|time:"H:i" }}<br>
+                    <strong>Date :</strong> {{ commande.date_collecte|date:"d/m/Y" }}<br>
+                    <strong>Lieu :</strong> {{ boulangerie.nom }}<br>
+                    <strong>Adresse :</strong> {{ boulangerie.adresse }}, {{ boulangerie.code }} {{ boulangerie.ville }}
+                </p>
+            </div>
+            
+            <h3>📦 Récapitulatif de votre commande :</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f8f9fa;">
+                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Quantité</th>
+                        <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Produit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in commande.lignes.all %}
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ ligne.quantite }}x</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ ligne.nom_produit }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td style="padding: 10px; font-weight: bold;">Total :</td>
+                        <td style="padding: 10px; font-weight: bold; color: #28a745;">{{ commande.total }}€</td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="font-size: 16px;">
+                    <strong>Comment récupérer votre commande ?</strong>
+                </p>
+                <p>
+                    1️⃣ Présentez-vous à la boulangerie<br>
+                    2️⃣ Donnez votre nom au vendeur<br>
+                    3️⃣ Communiquez le code <strong>{{ commande.code_recuperation }}</strong><br>
+                    4️⃣ Récupérez votre commande !
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>
+                Merci pour votre confiance !<br>
+                {{ boulangerie.nom }}<br>
+                📞 {{ boulangerie.telephone }}
+            </p>
+            <p style="font-size: 12px; color: #999;">
+                Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

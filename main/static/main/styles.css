@@ -387,3 +387,231 @@ footer a:hover {
         height: 150px;
     }
 }
+
+/* ===== AUTHENTICATION STYLES ===== */
+.auth-page {
+    background-color: var(--color-beige);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container {
+    width: 100%;
+    height: 100vh;
+    background-color: white;
+    box-shadow: var(--shadow-standard);
+}
+
+.auth-left {
+    background-color: var(--color-brown);
+    height: 100%;
+}
+
+.brand-box {
+    border: 3px solid white;
+    border-radius: 20px;
+    padding: 1.5rem 3rem;
+    display: inline-block;
+}
+
+.auth-form-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+}
+
+.auth-form .form-floating {
+    position: relative;
+}
+
+.auth-form .form-floating label {
+    color: var(--color-brown);
+}
+
+.auth-form .form-floating .form-control:focus ~ label {
+    color: var(--color-orange);
+}
+
+/* Navigation pills */
+.nav-pills .nav-link {
+    background-color: transparent;
+    color: var(--color-brown);
+    border: 2px solid var(--color-brown);
+    margin-right: 1rem;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--color-brown);
+    color: white;
+    border-color: var(--color-brown);
+}
+
+.nav-pills .nav-link:hover {
+    background-color: var(--color-orange);
+    border-color: var(--color-orange);
+    color: white;
+}
+
+/* Password field with eye button */
+.btn-eye {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--color-brown);
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 10;
+}
+
+.btn-eye:hover {
+    color: var(--color-orange);
+}
+
+/* Virtual Keyboard */
+.virtual-keyboard {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--color-cream);
+    border-radius: 10px;
+    display: none;
+}
+
+.keyboard-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+}
+
+.key-btn {
+    background-color: var(--color-brown);
+    color: white;
+    border: none;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-standard);
+}
+
+.key-btn:hover {
+    background-color: var(--color-beige);
+    color: black;
+    transform: translateY(-2px);
+}
+
+.key-btn:active {
+    transform: translateY(0);
+}
+
+.keyboard-actions {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 0.5rem;
+}
+
+.key-clear {
+    background-color: var(--color-orange);
+}
+
+.key-backspace {
+    background-color: #dc3545;
+}
+
+/* Verification Page */
+.verification-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-beige);
+}
+
+.verification-box {
+    background-color: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-standard);
+    max-width: 500px;
+    width: 100%;
+    margin: 2rem;
+}
+
+.brand-icon {
+    width: 80px;
+    height: 80px;
+    background-color: var(--color-cream);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.code-input {
+    font-size: 2rem;
+    text-align: center;
+    letter-spacing: 1rem;
+    font-weight: bold;
+    padding: 1rem;
+    border: 3px solid var(--color-beige);
+}
+
+.code-input:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(216, 107, 30, 0.25);
+}
+
+.timer {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-orange);
+}
+
+.btn-outline-brown {
+    color: var(--color-brown);
+    border: 2px solid var(--color-brown);
+    background-color: transparent;
+}
+
+.btn-outline-brown:hover {
+    background-color: var(--color-brown);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .auth-left {
+        display: none;
+    }
+    
+    .auth-form-container {
+        margin: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .keyboard-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.3rem;
+    }
+    
+    .key-btn {
+        padding: 0.8rem;
+        font-size: 1rem;
+    }
+    
+    .code-input {
+        font-size: 1.5rem;
+        letter-spacing: 0.5rem;
+    }
+}

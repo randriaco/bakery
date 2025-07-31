@@ -1,0 +1,258 @@
+{% extends 'main/bases/base_gerant.html' %}
+{% load i18n %}
+
+{% block title %}Fermetures spécifiques - Gérant{% endblock %}
+
+{% block page_title %}Fermetures spécifiques{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Formulaire -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-calendar-times me-2"></i>Nouvelle fermeture
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-calendar me-2"></i>{{ form.date.label }}
+                            </label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                                <div class="text-danger small mt-1">{{ form.date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-clock me-2"></i>{{ form.type_fermeture.label }}
+                            </label>
+                            {{ form.type_fermeture }}
+                            {% if form.type_fermeture.errors %}
+                                <div class="text-danger small mt-1">{{ form.type_fermeture.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-comment me-2"></i>{{ form.motif.label }}
+                            </label>
+                            {{ form.motif }}
+                            {% if form.motif.errors %}
+                                <div class="text-danger small mt-1">{{ form.motif.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.notifier_clients }}
+                                <label class="form-check-label" for="{{ form.notifier_clients.id_for_label }}">
+                                    <i class="fas fa-envelope me-2"></i>{{ form.notifier_clients.label }}
+                                </label>
+                            </div>
+                            <small class="text-muted">{{ form.notifier_clients.help_text }}</small>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-orange px-5 py-2">
+                                <i class="fas fa-plus-circle me-2"></i>Ajouter la fermeture
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste des fermetures -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2"></i>Fermetures programmées
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if fermetures %}
+                        <div class="list-group list-group-flush">
+                            {% for fermeture in fermetures %}
+                            <div class="list-group-item p-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-10">
+                                        <!-- Date en haut avec jour correct -->
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-beige rounded p-2 px-3 me-3">
+                                                <h5 class="mb-0 text-brown fw-bold">{{ fermeture.date|date:"d/m/Y" }}</h5>
+                                            </div>
+                                            <span class="badge bg-secondary fs-6">
+                                                {% if fermeture.date|date:"w" == "0" %}Dimanche
+                                                {% elif fermeture.date|date:"w" == "1" %}Lundi
+                                                {% elif fermeture.date|date:"w" == "2" %}Mardi
+                                                {% elif fermeture.date|date:"w" == "3" %}Mercredi
+                                                {% elif fermeture.date|date:"w" == "4" %}Jeudi
+                                                {% elif fermeture.date|date:"w" == "5" %}Vendredi
+                                                {% elif fermeture.date|date:"w" == "6" %}Samedi
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Motif et type de fermeture -->
+                                        <h6 class="mb-2 text-brown fw-bold">{{ fermeture.motif }}</h6>
+                                        <span class="badge bg-primary">{{ fermeture.get_type_fermeture_display }}</span>
+                                        
+                                        {% if fermeture.type_fermeture == 'matin' %}
+                                            <p class="mb-0 mt-2 text-muted small">
+                                                <i class="fas fa-info-circle me-1"></i>Ouvert l'après-midi de 15:00 à 19:30
+                                            </p>
+                                        {% elif fermeture.type_fermeture == 'soir' %}
+                                            <p class="mb-0 mt-2 text-muted small">
+                                                <i class="fas fa-info-circle me-1"></i>Ouvert le matin de 07:00 à 15:00
+                                            </p>
+                                        {% else %}
+                                            <p class="mb-0 mt-2 text-muted small">
+                                                <i class="fas fa-info-circle me-1"></i>Fermé toute la journée
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-danger"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                data-bs-custom-class="tooltip-danger"
+                                                title="Supprimer cette fermeture"
+                                                onclick="confirmerSuppression({{ fermeture.pk }}, '{{ fermeture.date|date:'d/m/Y' }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune fermeture programmée</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="modalSupprimerFermeture" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmation de suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer la fermeture du <strong id="dateFermeture"></strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="formSuppression" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Messages toast -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+            <div class="toast show" role="alert">
+                <div class="toast-header bg-success text-white">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong class="me-auto">Succès</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.toast').classList.remove('show');
+            }, 3000);
+        </script>
+    {% endfor %}
+{% endif %}
+
+<style>
+/* Tooltip personnalisé avec fond rouge */
+.tooltip-danger .tooltip-inner {
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+    transition: all 0.2s ease;
+}
+
+/* Flèches du tooltip rouge pour toutes les directions */
+.tooltip-danger.bs-tooltip-top .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-bottom .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-start .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-end .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #dc3545;
+}
+</style>
+
+<script>
+// Initialiser les tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl)
+    );
+});
+
+// Fonction pour afficher le modal de confirmation
+function confirmerSuppression(fermetureId, dateFermeture) {
+    // Mettre à jour la date dans le modal
+    document.getElementById('dateFermeture').textContent = dateFermeture;
+    
+    // Mettre à jour l'action du formulaire
+    const formSuppression = document.getElementById('formSuppression');
+    formSuppression.action = "{% url 'supprimer_fermeture_specifique' 0 %}".replace('0', fermetureId);
+    
+    // Afficher le modal
+    const modal = new bootstrap.Modal(document.getElementById('modalSupprimerFermeture'));
+    modal.show();
+}
+</script>
+
+{% endblock %}

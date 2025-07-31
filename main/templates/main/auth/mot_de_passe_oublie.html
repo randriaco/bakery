@@ -1,0 +1,286 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block title %}Mot de passe oublié - {{ boulangerie.nom|default:"Pain Doré" }}{% endblock %}
+
+{% block content %}
+
+<div class="auth-page py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="auth-card">
+                    <div class="auth-header text-center mb-4">
+                        <div class="auth-icon mx-auto mb-3">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h2 class="auth-title">Mot de passe oublié</h2>
+                        <p class="auth-subtitle text-muted">Entrez votre adresse email pour réinitialiser votre mot de passe</p>
+                    </div>
+                    
+                    <div class="info-box mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Un lien de réinitialisation sera envoyé à votre adresse email</small>
+                    </div>
+                    
+                    <form id="form-forgot-password" class="auth-form" method="post" action="{% url 'mot_de_passe_oublie' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" 
+                                       placeholder="Email" required autofocus>
+                                <label for="email">
+                                    <i class="fas fa-envelope me-2"></i>Adresse email
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-orange w-100 py-3 mb-4">
+                            <i class="fas fa-paper-plane me-2"></i>Envoyer le lien
+                        </button>
+                        
+                        <div class="text-center">
+                            <a href="{% url 'connexion' %}" class="back-link text-decoration-none">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la connexion
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Attendre que tout soit chargé
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Script chargé');
+        
+        function showNotification(message, isError = false) {
+            // Simple alerte pour éviter les problèmes avec Bootstrap
+            alert(message);
+        }
+        
+        const form = document.getElementById('form-forgot-password');
+        console.log('Formulaire trouvé:', form);
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Formulaire soumis');
+                
+                const email = document.getElementById('email').value;
+                const submitBtn = this.querySelector('button[type="submit"]');
+                
+                // Validation email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showNotification('Veuillez entrer une adresse email valide');
+                    return false;
+                }
+                
+                // Désactiver le bouton
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...';
+                
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                // Afficher dans la console pour déboguer
+                console.log('Envoi de l\'email:', email);
+                
+                fetch('{% url "mot_de_passe_oublie" %}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    console.log('Statut de la réponse:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Erreur réseau');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Données reçues:', data);
+                    if (data.success) {
+                        // Afficher le message de succès
+                        document.querySelector('.auth-card').innerHTML = `
+                            <div class="text-center py-4">
+                                <div class="mb-4">
+                                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                                </div>
+                                <h5 class="text-brown fw-bold mb-3">Email envoyé !</h5>
+                                <p class="text-muted mb-4">
+                                    Si l'adresse email <strong>${email}</strong> est associée à un compte, 
+                                    vous recevrez un lien de réinitialisation dans quelques instants.
+                                </p>
+                                <p class="text-muted small mb-4">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Pensez à vérifier votre dossier spam si vous ne recevez pas l'email.
+                                </p>
+                                <a href="{% url 'connexion' %}" class="btn btn-orange">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Retour à la connexion
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        showNotification(data.error || 'Une erreur est survenue');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Envoyer le lien';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    showNotification('Une erreur est survenue. Veuillez réessayer.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Envoyer le lien';
+                });
+                
+                return false;
+            });
+        } else {
+            console.error('Formulaire non trouvé');
+        }
+    });
+</script>
+
+<style>
+/* Variables CSS */
+:root {
+    --color-brown: #8B4513;
+    --color-orange: #FF8C00;
+    --color-beige: #F5F5DC;
+    --shadow-standard: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Page d'authentification */
+.auth-page {
+    min-height: calc(100vh - 160px);
+    background-color: var(--color-beige);
+}
+
+.auth-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-standard);
+    border: 1px solid #e9ecef;
+}
+
+/* En-tête */
+.auth-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-brown), #A0522D);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-brown);
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    font-size: 1.1rem;
+}
+
+/* Formulaires */
+.form-floating > .form-control {
+    height: 60px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.25);
+}
+
+.form-floating > label {
+    color: var(--color-brown);
+    font-weight: 500;
+}
+
+/* Boutons */
+.btn-orange {
+    background: linear-gradient(135deg, var(--color-orange), #ff8c00);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-orange:hover {
+    background: linear-gradient(135deg, #ff8c00, var(--color-orange));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+}
+
+.btn-orange:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Info box */
+.info-box {
+    background-color: #fff3cd;
+    border-left: 4px solid var(--color-orange);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.info-box i {
+    color: var(--color-orange);
+}
+
+/* Lien retour */
+.back-link {
+    color: var(--color-brown);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-orange);
+}
+
+/* Couleur personnalisée */
+.text-brown {
+    color: var(--color-brown) !important;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .auth-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .auth-title {
+        font-size: 1.8rem;
+    }
+}
+</style>
+{% endblock %}

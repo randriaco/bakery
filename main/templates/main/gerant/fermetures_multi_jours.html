@@ -1,0 +1,310 @@
+{% extends 'main/bases/base_gerant.html' %}
+{% load i18n %}
+
+{% block title %}Fermetures multi-jours - Gérant{% endblock %}
+
+{% block page_title %}Fermetures multi-jours{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Formulaire -->
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-calendar-week me-2"></i>Nouvelle période de fermeture
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-calendar-plus me-2"></i>{{ form.date_debut.label }}
+                            </label>
+                            {{ form.date_debut }}
+                            {% if form.date_debut.errors %}
+                                <div class="text-danger small mt-1">{{ form.date_debut.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-calendar-minus me-2"></i>{{ form.date_fin.label }}
+                            </label>
+                            {{ form.date_fin }}
+                            {% if form.date_fin.errors %}
+                                <div class="text-danger small mt-1">{{ form.date_fin.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-comment me-2"></i>{{ form.motif.label }}
+                            </label>
+                            {{ form.motif }}
+                            {% if form.motif.errors %}
+                                <div class="text-danger small mt-1">{{ form.motif.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form.notifier_clients }}
+                                <label class="form-check-label" for="{{ form.notifier_clients.id_for_label }}">
+                                    <i class="fas fa-envelope me-2"></i>{{ form.notifier_clients.label }}
+                                </label>
+                            </div>
+                            <small class="text-muted">{{ form.notifier_clients.help_text }}</small>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-orange px-5 py-2">
+                                <i class="fas fa-plus-circle me-2"></i>Ajouter la période
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste des fermetures -->
+        <div class="col-md-7">
+            <div class="card shadow">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2"></i>Périodes de fermeture programmées
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if fermetures %}
+                        <div class="list-group list-group-flush">
+                            {% for fermeture in fermetures %}
+                            <div class="list-group-item p-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-10">
+                                        <!-- Dates en haut -->
+                                        <div class="mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-beige rounded p-2 px-3 me-2">
+                                                    <h5 class="mb-0 text-brown fw-bold">{{ fermeture.date_debut|date:"d/m/Y" }}</h5>
+                                                </div>
+                                                <i class="fas fa-arrow-right text-brown mx-2"></i>
+                                                <div class="bg-beige rounded p-2 px-3">
+                                                    <h5 class="mb-0 text-brown fw-bold">{{ fermeture.date_fin|date:"d/m/Y" }}</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Jours en français -->
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            Du 
+                                            {% if fermeture.date_debut|date:"w" == "0" %}Dimanche
+                                            {% elif fermeture.date_debut|date:"w" == "1" %}Lundi
+                                            {% elif fermeture.date_debut|date:"w" == "2" %}Mardi
+                                            {% elif fermeture.date_debut|date:"w" == "3" %}Mercredi
+                                            {% elif fermeture.date_debut|date:"w" == "4" %}Jeudi
+                                            {% elif fermeture.date_debut|date:"w" == "5" %}Vendredi
+                                            {% elif fermeture.date_debut|date:"w" == "6" %}Samedi
+                                            {% endif %}
+                                            {{ fermeture.date_debut|date:"d F Y" }}
+                                            au 
+                                            {% if fermeture.date_fin|date:"w" == "0" %}Dimanche
+                                            {% elif fermeture.date_fin|date:"w" == "1" %}Lundi
+                                            {% elif fermeture.date_fin|date:"w" == "2" %}Mardi
+                                            {% elif fermeture.date_fin|date:"w" == "3" %}Mercredi
+                                            {% elif fermeture.date_fin|date:"w" == "4" %}Jeudi
+                                            {% elif fermeture.date_fin|date:"w" == "5" %}Vendredi
+                                            {% elif fermeture.date_fin|date:"w" == "6" %}Samedi
+                                            {% endif %}
+                                            {{ fermeture.date_fin|date:"d F Y" }}
+                                        </p>
+                                        
+                                        <!-- Motif et badges -->
+                                        <h6 class="mb-2 text-brown fw-bold">{{ fermeture.motif }}</h6>
+                                        <div class="mb-0">
+                                            <span class="badge bg-info text-white">
+                                                {{ fermeture.nombre_jours }} jours
+                                            </span>
+                                            {% if fermeture.est_en_cours %}
+                                                <span class="badge bg-danger ms-2">En cours</span>
+                                            {% elif fermeture.est_a_venir %}
+                                                <span class="badge bg-warning text-dark ms-2">À venir</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary ms-2">Passée</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-center">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-danger"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                data-bs-custom-class="tooltip-danger"
+                                                title="Supprimer cette fermeture"
+                                                onclick="confirmerSuppression({{ fermeture.pk }}, '{{ fermeture.date_debut|date:'d/m/Y' }}', '{{ fermeture.date_fin|date:'d/m/Y' }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune période de fermeture programmée</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Vue d'ensemble (calendrier simplifié) -->
+            <div class="card shadow mt-3">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-calendar-alt me-2"></i>Vue d'ensemble
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">
+                        Cette vue affiche toutes les périodes de fermeture programmées pour les prochains mois.
+                    </p>
+                    <!-- Ici vous pouvez ajouter un calendrier visuel si souhaité -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="modalSupprimerPeriode" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmation de suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer la période de fermeture du <strong id="dateDebutPeriode"></strong> au <strong id="dateFinPeriode"></strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="formSuppression" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Messages toast -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+            <div class="toast show" role="alert">
+                <div class="toast-header bg-success text-white">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong class="me-auto">Succès</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.toast').classList.remove('show');
+            }, 3000);
+        </script>
+    {% endfor %}
+{% endif %}
+
+<style>
+/* Tooltip personnalisé avec fond rouge */
+.tooltip-danger .tooltip-inner {
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+    transition: all 0.2s ease;
+}
+
+/* Flèches du tooltip rouge pour toutes les directions */
+.tooltip-danger.bs-tooltip-top .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-bottom .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-start .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-end .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #dc3545;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => 
+        new bootstrap.Tooltip(tooltipTriggerEl)
+    );
+    
+    // Validation des dates
+    const dateDebut = document.querySelector('input[name="date_debut"]');
+    const dateFin = document.querySelector('input[name="date_fin"]');
+    
+    if (dateDebut && dateFin) {
+        dateDebut.addEventListener('change', function() {
+            dateFin.min = this.value;
+            if (dateFin.value && dateFin.value < this.value) {
+                dateFin.value = this.value;
+            }
+        });
+        
+        // Définir la date minimale à aujourd'hui
+        const today = new Date().toISOString().split('T')[0];
+        dateDebut.min = today;
+        dateFin.min = today;
+    }
+});
+
+// Fonction pour afficher le modal de confirmation
+function confirmerSuppression(periodeId, dateDebut, dateFin) {
+    // Mettre à jour les dates dans le modal
+    document.getElementById('dateDebutPeriode').textContent = dateDebut;
+    document.getElementById('dateFinPeriode').textContent = dateFin;
+    
+    // Mettre à jour l'action du formulaire
+    const formSuppression = document.getElementById('formSuppression');
+    formSuppression.action = "{% url 'supprimer_fermeture_multi_jours' 0 %}".replace('0', periodeId);
+    
+    // Afficher le modal
+    const modal = new bootstrap.Modal(document.getElementById('modalSupprimerPeriode'));
+    modal.show();
+}
+</script>
+
+{% endblock %}

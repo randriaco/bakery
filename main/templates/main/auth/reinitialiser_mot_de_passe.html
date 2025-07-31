@@ -1,0 +1,551 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block title %}Nouveau mot de passe - {{ boulangerie.nom|default:"Pain Doré" }}{% endblock %}
+
+{% block content %}
+
+<div class="auth-page py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="auth-card">
+                    <div class="auth-header text-center mb-4">
+                        <div class="auth-icon mx-auto mb-3">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h2 class="auth-title">Nouveau mot de passe</h2>
+                        <p class="auth-subtitle text-muted">Créez votre nouveau mot de passe sécurisé</p>
+                    </div>
+                    
+                    <div class="password-requirements mb-4">
+                        <h6 class="text-brown fw-bold mb-3">Votre mot de passe doit contenir :</h6>
+                        <div class="requirement" id="req-length">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Exactement 6 chiffres</span>
+                        </div>
+                        <div class="requirement" id="req-match">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Les deux mots de passe doivent être identiques</span>
+                        </div>
+                    </div>
+                    
+                    <form id="form-reset-password" class="auth-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="token" value="{{ token }}">
+                        
+                        <div class="mb-3">
+                            <div class="form-floating position-relative">
+                                <input type="password" class="form-control password-field" 
+                                       id="password" placeholder="Nouveau mot de passe" 
+                                       readonly required maxlength="6">
+                                <label for="password">
+                                    <i class="fas fa-lock me-2"></i>Nouveau mot de passe
+                                </label>
+                                <button type="button" class="btn-eye" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-floating position-relative">
+                                <input type="password" class="form-control password-field" 
+                                       id="password-confirm" placeholder="Confirmer le mot de passe" 
+                                       readonly required maxlength="6">
+                                <label for="password-confirm">
+                                    <i class="fas fa-lock me-2"></i>Confirmer le mot de passe
+                                </label>
+                                <button type="button" class="btn-eye" onclick="togglePassword('password-confirm')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="virtual-keyboard mb-4" data-target="password,password-confirm"></div>
+                        
+                        <button type="submit" class="btn btn-orange w-100 py-3 mb-4" disabled>
+                            <i class="fas fa-save me-2"></i>Enregistrer le nouveau mot de passe
+                        </button>
+                        
+                        <div class="text-center">
+                            <a href="{% url 'connexion' %}" class="back-link text-decoration-none">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à la connexion
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPasswordField = null;
+    
+    // Initialiser les claviers virtuels
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeKeyboards();
+        
+        // Valider le mot de passe en temps réel
+        document.getElementById('password').addEventListener('input', validatePassword);
+        document.getElementById('password-confirm').addEventListener('input', validatePassword);
+        
+        // Gérer la soumission
+        document.getElementById('form-reset-password').addEventListener('submit', handleSubmit);
+    });
+    
+    function initializeKeyboards() {
+        document.querySelectorAll('.virtual-keyboard').forEach(keyboard => {
+            const targets = keyboard.dataset.target.split(',');
+            
+            // Générer les chiffres aléatoires
+            const numbers = shuffleArray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            
+            // Créer le clavier
+            let html = '<div class="keyboard-grid">';
+            numbers.forEach((num, index) => {
+                if (index === 5) html += '</div><div class="keyboard-grid mt-2">';
+                html += `<button type="button" class="key-btn" onclick="addDigit('${num}', '${keyboard.dataset.target}')">${num}</button>`;
+            });
+            html += '</div>';
+            
+            // Ajouter les boutons d'action
+            html += `
+                <div class="keyboard-actions mt-2">
+                    <button type="button" class="key-btn key-clear" onclick="clearPassword('${keyboard.dataset.target}')">
+                        <i class="fas fa-times"></i> Effacer
+                    </button>
+                    <button type="button" class="key-btn key-backspace" onclick="backspace('${keyboard.dataset.target}')">
+                        <i class="fas fa-backspace"></i>
+                    </button>
+                </div>
+            `;
+            
+            keyboard.innerHTML = html;
+            
+            // Gérer le focus des champs
+            targets.forEach(target => {
+                const field = document.getElementById(target);
+                if (field) {
+                    field.addEventListener('focus', () => {
+                        currentPasswordField = target;
+                        keyboard.style.display = 'block';
+                    });
+                    
+                    field.addEventListener('blur', () => {
+                        setTimeout(() => {
+                            if (!keyboard.contains(document.activeElement)) {
+                                keyboard.style.display = 'none';
+                            }
+                        }, 200);
+                    });
+                }
+            });
+        });
+    }
+    
+    function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+    
+    function addDigit(digit, targets) {
+        const targetArray = targets.split(',');
+        targetArray.forEach(target => {
+            if (currentPasswordField === target) {
+                const field = document.getElementById(target);
+                // Ne pas dépasser 6 chiffres
+                if (field.value.length < 6) {
+                    field.value += digit;
+                    validatePassword();
+                }
+            }
+        });
+    }
+    
+    function clearPassword(targets) {
+        const targetArray = targets.split(',');
+        targetArray.forEach(target => {
+            if (currentPasswordField === target) {
+                document.getElementById(target).value = '';
+                validatePassword();
+            }
+        });
+    }
+    
+    function backspace(targets) {
+        const targetArray = targets.split(',');
+        targetArray.forEach(target => {
+            if (currentPasswordField === target) {
+                const field = document.getElementById(target);
+                field.value = field.value.slice(0, -1);
+                validatePassword();
+            }
+        });
+    }
+    
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const button = field.nextElementSibling.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    
+    function validatePassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('password-confirm').value;
+        const submitBtn = document.querySelector('button[type="submit"]');
+        
+        let isValid = true;
+        
+        // Validation longueur (exactement 6 chiffres)
+        const lengthReq = document.getElementById('req-length');
+        if (password.length === 6 && /^\d+$/.test(password)) {
+            lengthReq.classList.add('valid');
+            lengthReq.classList.remove('invalid');
+            lengthReq.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            lengthReq.classList.remove('valid');
+            lengthReq.classList.add('invalid');
+            lengthReq.querySelector('i').className = 'fas fa-times-circle';
+            isValid = false;
+        }
+        
+        // Validation correspondance
+        const matchReq = document.getElementById('req-match');
+        if (confirmPassword && password === confirmPassword) {
+            matchReq.classList.add('valid');
+            matchReq.classList.remove('invalid');
+            matchReq.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            matchReq.classList.remove('valid');
+            matchReq.classList.add('invalid');
+            matchReq.querySelector('i').className = 'fas fa-times-circle';
+            if (confirmPassword) {
+                isValid = false;
+            }
+        }
+        
+        // Activer/désactiver le bouton
+        submitBtn.disabled = !isValid || !confirmPassword || password !== confirmPassword;
+    }
+    
+    function showNotification(message, isError = false) {
+        alert(message);
+    }
+    
+    function handleSubmit(e) {
+        e.preventDefault();
+        
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('password-confirm').value;
+        
+        // Validation finale
+        if (password.length !== 6 || !/^\d+$/.test(password)) {
+            showNotification('Le mot de passe doit contenir exactement 6 chiffres');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showNotification('Les mots de passe ne correspondent pas');
+            return;
+        }
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+        
+        const formData = new FormData(e.target);
+        formData.append('password', password);
+        formData.append('password-confirm', confirmPassword);
+        
+        fetch('{% url "reinitialiser_mot_de_passe" token=token %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Afficher le message de succès
+                document.querySelector('.auth-card').innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="mb-4">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                        </div>
+                        <h5 class="text-brown fw-bold mb-3">Mot de passe réinitialisé !</h5>
+                        <p class="text-muted mb-4">
+                            Votre mot de passe a été modifié avec succès.
+                            Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
+                        </p>
+                        <a href="{% url 'connexion' %}" class="btn btn-orange">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </a>
+                    </div>
+                `;
+            } else {
+                showNotification(data.error || 'Une erreur est survenue');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Enregistrer le nouveau mot de passe';
+            }
+        })
+        .catch(error => {
+            showNotification('Une erreur est survenue');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Enregistrer le nouveau mot de passe';
+        });
+    }
+</script>
+
+<style>
+/* Variables CSS */
+:root {
+    --color-brown: #8B4513;
+    --color-orange: #FF8C00;
+    --color-beige: #F5F5DC;
+    --shadow-standard: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Page d'authentification */
+.auth-page {
+    min-height: calc(100vh - 160px);
+    background-color: var(--color-beige);
+}
+
+.auth-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-standard);
+    border: 1px solid #e9ecef;
+}
+
+/* En-tête */
+.auth-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-brown), #A0522D);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-brown);
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    font-size: 1.1rem;
+}
+
+/* Formulaires */
+.form-floating > .form-control {
+    height: 60px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-floating > .form-control:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.25);
+}
+
+.form-floating > label {
+    color: var(--color-brown);
+    font-weight: 500;
+}
+
+/* Boutons */
+.btn-orange {
+    background: linear-gradient(135deg, var(--color-orange), #ff8c00);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-orange:hover {
+    background: linear-gradient(135deg, #ff8c00, var(--color-orange));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+}
+
+.btn-orange:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-eye {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-brown);
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 5;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-eye:hover {
+    background: rgba(139, 69, 19, 0.1);
+    color: var(--color-orange);
+}
+
+/* Requirements de mot de passe */
+.password-requirements {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+.requirement {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.requirement i {
+    width: 20px;
+    margin-right: 0.5rem;
+}
+
+.requirement.valid i {
+    color: #28a745;
+}
+
+.requirement.invalid i {
+    color: #dc3545;
+}
+
+/* Lien retour */
+.back-link {
+    color: var(--color-brown);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-orange);
+}
+
+/* Couleur personnalisée */
+.text-brown {
+    color: var(--color-brown) !important;
+}
+
+/* Clavier virtuel */
+.virtual-keyboard {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+    border: 1px solid #e9ecef;
+}
+
+.keyboard-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.keyboard-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.key-btn {
+    background: var(--color-brown);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.key-btn:hover {
+    background: #5a4037;
+    transform: translateY(-1px);
+}
+
+.key-clear {
+    background: var(--color-orange);
+}
+
+.key-clear:hover {
+    background: #ff8c00;
+}
+
+.key-backspace {
+    background: #dc3545;
+}
+
+.key-backspace:hover {
+    background: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .auth-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .auth-title {
+        font-size: 1.8rem;
+    }
+    
+    .keyboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+</style>
+{% endblock %}

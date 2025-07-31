@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'reportlab',  # Pour la génération de PDF
 ]
 
 MIDDLEWARE = [
@@ -64,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.pretes_count',
             ],
         },
     },
@@ -86,30 +88,34 @@ DATABASES = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 6},
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
+# USE_TZ = True
+
+TIME_ZONE = 'Europe/Paris'  # Au lieu de 'UTC'
 USE_TZ = True
 
 
@@ -131,5 +137,23 @@ EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025  # Port SMTP de MailHog
 EMAIL_USE_TLS = False
 
+# URL du site pour les emails
+SITE_URL = 'http://localhost:8000'  # En développement
+
+# nom, adresse, telephone - Boulangerie
+BAKERY_NAME = "Pain Doré"
+BAKERY_ADDRESS = "123 rue de la Republique"
+BAKERY_PHONE = "123456789"
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Redirige @login_required vers la page de connexion personnalisée
+LOGIN_URL = 'login'          # = le name='login' défini ci-dessus
+# Après connexion réussie, où rediriger l’utilisateur ?
+LOGIN_REDIRECT_URL = 'dashboard_gerant'
+
+# Stripe Configuration
+
+
+

@@ -2,51 +2,89 @@
 <button class="menu-toggle" id="menuToggle">
     <i class="fas fa-bars"></i>
 </button>
-
+  
 <!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-    <!-- Info Boulangerie -->
+<nav class="sidebar">
+    <!-- Info boulangerie -->
     <div class="boulangerie-info">
-        <h5><i class="fas fa-store"></i> {{ boulangerie.nom }}</h5>
-        <p><i class="fas fa-map-marker-alt"></i> {{ boulangerie.adresse }}</p>
-        <p><i class="fas fa-city"></i> {{ boulangerie.code }} {{ boulangerie.ville }}</p>
-        <p><i class="fas fa-phone"></i> {{ boulangerie.telephone }}</p>
+        <h5><i class="fas fa-store"></i> {{ boulangerie.nom|default:"Pain Doré" }}</h5>
+        <p><i class="fas fa-map-marker-alt"></i> {{ boulangerie.adresse|default:"123 rue Pierre Brossolette" }}</p>
+        <p><i class="fas fa-city"></i> {{ boulangerie.code|default:"94200" }} {{ boulangerie.ville|default:"Athis Mons" }}</p>
+        <p><i class="fas fa-phone"></i> {{ boulangerie.telephone|default:"0123456789" }}</p>
     </div>
 
-    <!-- Menu principal -->
-    <nav class="mt-3">
+    <!-- Menu navigation -->
+    <div class="nav-header">====== Général ======</div>
+    <div class="nav flex-column">
         <a href="{% url 'dashboard_gerant' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard_gerant' %}active{% endif %}">
-            <i class="fas fa-chart-line me-2"></i> Tableau de bord
+            <i class="fas fa-tachometer-alt me-2"></i> Tableau de bord
         </a>
+        <!-- Lien corrigé -->
+        <a href="{% url 'dashboard_gerant_commandes' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard_gerant_commandes' %}active{% endif %}">
+            <i class="fas fa-shopping-cart me-2"></i> Commandes
+        </a>
+    </div>
 
-        <!-- Comptes -->
-        <div class="nav-header">Comptes</div>
-        <a href="#" class="nav-link">
-            <i class="fas fa-store me-2"></i> Restaurant
+    <div class="nav-header">===== Comptes =====</div>
+    <div class="nav flex-column">
+        {% comment %} <a href="#" class="nav-link">
+            <i class="fas fa-utensils me-2"></i> Restaurant
+        </a> {% endcomment %}
+        <a class="nav-link {% if request.resolver_match.url_name == 'parametres_boulangerie' %}active{% endif %}" 
+        href="{% url 'parametres_boulangerie' %}">
+            <i class="fas fa-cog me-2"></i> Paramètres Boulangerie
         </a>
-        <a href="#" class="nav-link">
+        {% comment %} <a href="#" class="nav-link">
             <i class="fas fa-user-tie me-2"></i> Gérant
+        </a> {% endcomment %}
+        <a class="nav-link {% if request.resolver_match.url_name == 'parametres_gerant' %}active{% endif %}" 
+        href="{% url 'parametres_gerant' %}">
+            <i class="fas fa-user-cog me-2"></i> Paramètres Gérant
         </a>
+    </div>
 
-        <!-- Horaires -->
-        <div class="nav-header">Horaires</div>
-        <a href="#" class="nav-link">
-            <i class="fas fa-clock me-2"></i> Horaires Hebdomadaires
+    <div class="nav-header">===== Horaires =====</div>
+    <div class="nav flex-column">
+        <a href="{% url 'frequence_collecte' %}" class="nav-link {% if request.resolver_match.url_name == 'frequence_collecte' %}active{% endif %}">
+            <i class="fas fa-hourglass-half me-2"></i> Fréquence
         </a>
-        <a href="#" class="nav-link">
+        <a href="{% url 'horaires_hebdomadaires' %}" class="nav-link {% if request.resolver_match.url_name == 'horaires_hebdomadaires' %}active{% endif %}">
+            <i class="fas fa-calendar-week me-2"></i> Horaires Hebdomadaires
+        </a>
+        <a href="{% url 'fermetures_specifiques' %}" class="nav-link {% if request.resolver_match.url_name == 'fermetures_specifiques' %}active{% endif %}">
             <i class="fas fa-calendar-times me-2"></i> Fermetures Spécifiques
         </a>
-        <a href="#" class="nav-link">
-            <i class="fas fa-calendar-alt me-2"></i> Fermetures multi-jour
+        <a href="{% url 'fermetures_multi_jours' %}" class="nav-link {% if request.resolver_match.url_name == 'fermetures_multi_jours' %}active{% endif %}">
+            <i class="fas fa-calendar-check me-2"></i> Fermetures multi-jours
         </a>
+    </div>
 
-        <!-- Produits -->
-        <div class="nav-header">Produits</div>
-        <a href="{% url 'liste_categories' %}" class="nav-link {% if 'categorie' in request.path %}active{% endif %}">
+    <div class="nav-header">===== Produits =====</div>
+    <div class="nav flex-column">
+        <a href="{% url 'liste_categories' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_categories' %}active{% endif %}">
             <i class="fas fa-tags me-2"></i> Catégories
         </a>
-        <a href="{% url 'liste_produits' %}" class="nav-link {% if 'produit' in request.path %}active{% endif %}">
-            <i class="fas fa-bread-slice me-2"></i> Produits
+        <a href="{% url 'liste_produits' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_produits' %}active{% endif %}">
+            <i class="fas fa-box me-2"></i> Produits
         </a>
-    </nav>
-</div>
+    </div>
+
+    <div class="nav-header">===== Personnel =====</div>
+    <div class="nav flex-column">
+        <a href="{% url 'creer_personnel' %}" class="nav-link {% if request.resolver_match.url_name == 'creer_personnel' %}active{% endif %}">
+            <i class="fas fa-user-plus me-2"></i> Créer personnel
+        </a>
+        <a href="{% url 'liste_commande_a_preparer' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_commande_a_preparer' %}active{% endif %}">
+            <i class="fas fa-clipboard-list me-2"></i> Préparation commandes
+        </a>
+    </div>
+
+    <div class="nav-header">===== Session =====</div>
+    <div class="nav flex-column mb-3">
+    <a href="{% url 'deconnexion' %}"
+        class="nav-link logout-link"> 
+        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+    </a>
+    </div>
+
+</nav>     

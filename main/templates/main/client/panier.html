@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <div>
     <!-- Hero Section -->
     <section class="bg-beige py-4">
@@ -30,7 +31,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Résumé commande -->
                 <div class="col-lg-4">
                     <div class="card shadow-sm border-0 sticky-top" style="top: 80px;">
@@ -39,6 +40,14 @@
                         </div>
                         <div class="card-body">
                             <!-- Détails -->
+                            
+                            <div class="mb-3">
+                                <h6 class="text-brown fw-bold mb-2">Détail de la commande</h6>
+                                <div id="detail-commande" >
+                                    <!-- class="small" Le contenu sera généré dynamiquement par JavaScript -->
+                                </div>
+                            </div>
+                            
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Sous-total</span>
                                 <span class="fw-bold" id="sous-total">0.00€</span>
@@ -53,24 +62,51 @@
                                 <span class="h5 mb-0 text-orange fw-bold" id="total">0.00€</span>
                             </div>
 
-                            <!-- Heure de retrait -->
+                            <!-- Date et heure de retrait -->
                             <div class="mb-4" id="heure-section" style="display: none;">
+                                <!-- Sélection de la date -->
                                 <label class="form-label text-brown fw-bold">
-                                    <i class="fas fa-clock me-2"></i>Heure de retrait souhaitée
+                                    <i class="fas fa-calendar me-2"></i>Date de retrait souhaitée
                                 </label>
-                                <select class="form-select" id="heure-retrait">
-                                    <option value="">Choisir un créneau</option>
-                                    <option value="08:00">08:00 - 09:00</option>
-                                    <option value="09:00">09:00 - 10:00</option>
-                                    <option value="10:00">10:00 - 11:00</option>
-                                    <option value="11:00">11:00 - 12:00</option>
-                                    <option value="12:00">12:00 - 13:00</option>
-                                    <option value="14:00">14:00 - 15:00</option>
-                                    <option value="15:00">15:00 - 16:00</option>
-                                    <option value="16:00">16:00 - 17:00</option>
-                                    <option value="17:00">17:00 - 18:00</option>
-                                    <option value="18:00">18:00 - 19:00</option>
+                                <select class="form-select mb-3" id="date-retrait" onchange="chargerCreneaux()">
+                                    <option value="">Sélectionnez une date</option>
+                                    <!-- Les options seront générées dynamiquement -->
                                 </select>
+                                
+                                <!-- Sélection de l'heure -->
+                                <div id="creneaux-container" style="display: none;">
+                                    <label class="form-label text-brown fw-bold">
+                                        <i class="fas fa-clock me-2"></i>Heure de retrait souhaitée
+                                    </label>
+                                    
+                                    <!-- Créneaux matin -->
+                                    <div id="creneaux-matin" class="mb-3" style="display: none;">
+                                        <h6 class="text-orange fw-bold mb-2">
+                                            <i class="fas fa-sun text-orange me-2"></i>
+                                            Matin
+                                        </h6>
+                                        <div class="row g-2" id="creneaux-matin-list">
+                                            <!-- Les créneaux seront générés dynamiquement -->
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Créneaux après-midi -->
+                                    <div id="creneaux-soir" style="display: none;">
+                                        <h6 class="fw-bold text-brown mb-2">
+                                            <i class="fas fa-moon text-brown me-2"></i>
+                                            Après-midi
+                                        </h6>
+                                        <div class="row g-2" id="creneaux-soir-list">
+                                            <!-- Les créneaux seront générés dynamiquement -->
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Message si fermé -->
+                                    <div id="message-ferme" class="alert alert-warning" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <span id="raison-fermeture"></span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Bouton commander -->
@@ -105,7 +141,7 @@
                                 <li class="mb-2">
                                     <i class="fas fa-check text-success me-2"></i>
                                     Paiement sécurisé en ligne
-                                </li>                                
+                                </li>
                                 <li>
                                     <i class="fas fa-check text-success me-2"></i>
                                     Retrait en magasin uniquement
@@ -117,6 +153,7 @@
             </div>
         </div>
     </section>
+    
 </div>
 
 <!-- Modal de confirmation pour supprimer un produit -->
@@ -166,27 +203,8 @@
     </div>
 </div>
 
-<!-- Modal de succès paiement -->
-<div class="modal fade" id="modalPaiement" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-check-circle me-2"></i>Paiement
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <i class="fas fa-lock fa-3x text-success mb-3"></i>
-                <p>Redirection vers le paiement sécurisé...</p>
-                <p class="text-muted small">Vous allez être redirigé vers notre plateforme de paiement sécurisée Stripe.</p>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Stripe JS -->
+<script src="https://js.stripe.com/v3/"></script>
 
 <style>
 /* Cards produits responsive */
@@ -227,8 +245,8 @@
 /* Labels descriptifs */
 .produit-card p.text-muted {
     font-size: 1rem;
-    font-weight: bold;
-    text-transform: Capitalize;
+    font-weight: 500;
+    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
@@ -256,6 +274,22 @@
     }
 }
 
+/* Style pour les créneaux horaires */
+.creneau-btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+.creneau-btn:hover {
+    transform: translateY(-2px);
+}
+
+.creneau-btn.active {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+}
+
 /* Desktop: alignement */
 @media (min-width: 577px) {
     .produit-card .col-sm-4 {
@@ -276,20 +310,263 @@
         width: auto;
     }
 }
+
+/* Select et inputs personnalisés */
+.form-select, .form-control {
+    border: 2px solid var(--color-beige);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(216, 107, 30, 0.25);
+}
+
+/* Tooltip personnalisé avec fond rouge */
+.tooltip-danger .tooltip-inner {
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(220, 53, 69, 0.3);
+    transition: all 0.2s ease;
+}
+
+/* Flèches du tooltip rouge pour toutes les directions */
+.tooltip-danger.bs-tooltip-top .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before {
+    border-top-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-bottom .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before {
+    border-bottom-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-start .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before {
+    border-left-color: #dc3545;
+}
+
+.tooltip-danger.bs-tooltip-end .tooltip-arrow::before,
+.tooltip-danger.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before {
+    border-right-color: #dc3545;
+}
+
+/* Animation au survol */
+.tooltip-danger.show {
+    opacity: 1 !important;
+}
+
+/* Créneaux matin */
+.creneau-matin {
+    color: var(--color-orange);
+    font-weight: bold;
+    border: 3px solid var(--color-orange);
+    background-color: transparent;
+}
+
+.creneau-matin:hover {
+    background-color: var(--color-orange);
+    color: white;
+    border-color: var(--color-orange);
+}
+
+/* État actif - Créneaux matin */
+.creneau-matin.active {
+    background-color: var(--color-orange);
+    color: white;
+    border-color: var(--color-orange);
+}
+
+/* Créneaux soir */
+.creneau-soir {
+    color: var(--color-brown);
+    font-weight: bold;
+    border: 3px solid var(--color-brown);
+    background-color: transparent;
+}
+
+.creneau-soir:hover {
+    background-color: var(--color-brown);
+    color: white;
+    border-color: var(--color-brown);
+}
+
+/* État actif - Créneaux soir */
+.creneau-soir.active {
+    background-color: var(--color-brown);
+    color: white;
+    border-color: var(--color-brown);
+}
+
 </style>
 
 <script>
+// Initialiser Stripe
+const stripe = Stripe('pk_test_51RfKo1BSPLBh6EIs5U1qtO0erUZ33yaXko84pYqrk8Xc6Fwayk9aYiaBYK0MAnHc2sT96sTm9Uzv7AtXRGl7itTN00ko81Eumf');
+
 let panier = [];
 let produitASupprimer = null;
+let creneauSelectionne = null;
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
     chargerPanier();
     afficherPanier();
+    genererDatesDisponibles();
     
     // Écouter les changements d'heure
-    document.getElementById('heure-retrait').addEventListener('change', updateBoutonPaiement);
+    document.getElementById('date-retrait').addEventListener('change', updateBoutonPaiement);
 });
+
+// Générer les 7 prochains jours disponibles
+function genererDatesDisponibles() {
+    const selectDate = document.getElementById('date-retrait');
+    const today = new Date();
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const joursNoms = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        
+        const option = document.createElement('option');
+        option.value = date.toISOString().split('T')[0];
+        
+        if (i === 0) {
+            option.textContent = `Aujourd'hui - ${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+        } else if (i === 1) {
+            option.textContent = `Demain - ${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+        } else {
+            option.textContent = `${joursNoms[date.getDay()]} - ${date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+        }
+        
+        selectDate.appendChild(option);
+    }
+}
+
+// Charger les créneaux disponibles pour une date
+function chargerCreneaux() {
+    const dateSelectionnee = document.getElementById('date-retrait').value;
+    
+    if (!dateSelectionnee) {
+        document.getElementById('creneaux-container').style.display = 'none';
+        return;
+    }
+    
+    // Appel API pour récupérer les créneaux
+    fetch(`/api/creneaux-disponibles/?date=${dateSelectionnee}`)
+        .then(response => response.json())
+        .then(data => {
+            afficherCreneaux(data);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+}
+
+// Afficher les créneaux disponibles
+function afficherCreneaux(data) {
+    const container = document.getElementById('creneaux-container');
+    const creneauxMatin = document.getElementById('creneaux-matin');
+    const creneauxSoir = document.getElementById('creneaux-soir');
+    const messageFerme = document.getElementById('message-ferme');
+    
+    container.style.display = 'block';
+    
+    if (data.ferme || data.creneaux.length === 0) {
+        creneauxMatin.style.display = 'none';
+        creneauxSoir.style.display = 'none';
+        messageFerme.style.display = 'block';
+        
+        if (data.raison) {
+            document.getElementById('raison-fermeture').textContent = `${data.raison}`;
+        } else {
+            document.getElementById('raison-fermeture').textContent = 'Aucun créneau disponible pour cette date.';
+        }
+        creneauSelectionne = null;
+        updateBoutonPaiement();
+        return;
+    }
+    
+    messageFerme.style.display = 'none';
+    
+    // Séparer les créneaux matin et soir
+    const matinCreneaux = data.creneaux.filter(c => c.periode === 'matin');
+    const soirCreneaux = data.creneaux.filter(c => c.periode === 'soir');
+    
+    // Afficher créneaux matin
+    if (matinCreneaux.length > 0) {
+        creneauxMatin.style.display = 'block';
+        const matinList = document.getElementById('creneaux-matin-list');
+        matinList.innerHTML = '';
+        
+        matinCreneaux.forEach(creneau => {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-md-4';
+            col.innerHTML = `
+                <button type="button" class="btn w-100 creneau-btn creneau-matin" 
+                        onclick="selectionnerCreneau('${creneau.heure}', this)">
+                    ${creneau.heure}
+                </button>
+            `;
+            matinList.appendChild(col);
+        });
+    } else {
+        creneauxMatin.style.display = 'none';
+    }
+    
+    // Afficher créneaux soir
+    if (soirCreneaux.length > 0) {
+        creneauxSoir.style.display = 'block';
+        const soirList = document.getElementById('creneaux-soir-list');
+        soirList.innerHTML = '';
+        
+        soirCreneaux.forEach(creneau => {
+            const col = document.createElement('div');
+            col.className = 'col-4 col-md-4';
+            col.innerHTML = `
+                <button type="button" class="btn w-100 creneau-btn creneau-soir" 
+                        onclick="selectionnerCreneau('${creneau.heure}', this)">
+                    ${creneau.heure}
+                </button>
+            `;
+            soirList.appendChild(col);
+        });
+    } else {
+        creneauxSoir.style.display = 'none';
+    }
+}
+
+// Sélectionner un créneau
+function selectionnerCreneau(heure, button) {
+    // Retirer la sélection précédente
+    document.querySelectorAll('.creneau-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.remove('btn-warning', 'btn-primary');
+        btn.classList.add('btn-outline-warning', 'btn-outline-primary');
+    });
+    
+    // Ajouter la sélection
+    button.classList.add('active');
+    button.classList.remove('btn-outline-warning', 'btn-outline-primary');
+    
+    if (button.parentElement.closest('#creneaux-matin-list')) {
+        button.classList.add('btn-warning');
+    } else {
+        button.classList.add('btn-primary');
+    }
+    
+    creneauSelectionne = heure;
+    updateBoutonPaiement();
+}
+
+// Le reste des fonctions existantes...
 
 function chargerPanier() {
     panier = JSON.parse(localStorage.getItem('panier') || '[]');
@@ -323,19 +600,13 @@ function afficherPanier() {
                         <div class="row align-items-center text-center text-sm-start">
                             <!-- Produit -->
                             <div class="col-12 col-sm-4 mb-4 mb-sm-0">
-                                <h4 class="text-brown fw-5 fs-5 mb-2">${item.nom}</h4>
+                                <h4 class="text-brown fw-bold mb-2">${item.nom}</h4>
                                 <p class="text-orange fw-bold mb-0 fs-5">${item.categorie}</p>
                             </div>
                             
-                            <!-- Prix unitaire -->
-                            <div class="col-12 col-sm-2 mb-4 mb-sm-0">
-                                <p class="text-muted mb-2">Prix Unitaire</p>
-                                <p class="fw-bold mb-0 fs-5">${item.prix}€</p>
-                            </div>
-                            
                             <!-- Quantité -->
-                            <div class="col-12 col-sm-3 mb-4 mb-sm-0">
-                                <p class="text-muted mb-3">Quantité</p>
+                            <div class="col-12 col-sm-4 mb-4 mb-sm-0">
+                                
                                 <div class="d-flex align-items-center justify-content-center">
                                     <button onclick="diminuerQuantite(${index})" 
                                             class="btn btn-outline-secondary btn-quantite"
@@ -351,12 +622,14 @@ function afficherPanier() {
                             </div>
                             
                             <!-- Sous-total -->
-                            <div class="col-12 col-sm-3">
-                                <p class="text-muted mb-3">Sous-total</p>
-                                <div class="d-flex align-items-center justify-content-center justify-content-sm-end gap-3">
-                                    <p class="fw-bold fs-5 text-brown mb-0">${sousTotal}€</p>
+                            <div class="col-12 col-sm-4">
+                                <div class="d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-sm-end gap-3">
+                                    <p class="fw-bold fs-3 text-brown mb-0">${sousTotal}€</p>
                                     <button onclick="supprimerProduit(${index})" 
                                             class="btn btn-danger"
+                                            data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            data-bs-custom-class="tooltip-danger"
                                             title="Supprimer ce produit">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -368,9 +641,28 @@ function afficherPanier() {
             `;
         });
         
+        // Calculer le total général
+        const totalGeneral = panier.reduce((total, item) => total + (item.prix * item.quantite), 0).toFixed(2);
+        
         html += `
             </div>
+            
+            <!-- Total à payer -->
+            <div class="card border-0 bg-light mt-3 mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-6 text-end">
+                            <h4 class="mb-0 text-brown">Total à payer :</h4>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="mb-0 text-orange fw-bold">${totalGeneral} €</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <hr class="my-4">
+            
             <div class="row mt-4">
                 <div class="col-12 col-md-6 mb-3 mb-md-0 text-center text-md-start">
                     <a href="{% url 'commander' %}" class="btn btn-orange btn-lg px-5 py-3">
@@ -386,6 +678,13 @@ function afficherPanier() {
         `;
         
         container.innerHTML = html;
+        // Attendre un peu puis initialiser les tooltips
+        setTimeout(() => {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }, 100);
         heureSection.style.display = 'block';
     }
     
@@ -401,7 +700,34 @@ function calculerTotaux() {
     const sousTotal = panier.reduce((total, item) => total + (item.prix * item.quantite), 0);
     document.getElementById('sous-total').textContent = sousTotal.toFixed(2) + '€';
     document.getElementById('total').textContent = sousTotal.toFixed(2) + '€';
+    
+    // Afficher le détail de la commande
+    afficherDetailCommande();
 }
+
+// ajout fonction 
+
+function afficherDetailCommande() {
+    const detailContainer = document.getElementById('detail-commande');
+    
+    if (panier.length === 0) {
+        detailContainer.innerHTML = '<p class="text-muted mb-0">Aucun article</p>';
+    } else {
+        let detailHTML = '';
+        panier.forEach(item => {
+            const sousTotal = (item.prix * item.quantite).toFixed(2);
+            detailHTML += `
+                <div class="d-flex justify-content-between mb-1">
+                    <span>${item.quantite} ${item.nom}</span>
+                    <span class="fw-bold">${sousTotal} €</span>
+                </div>
+            `;
+        });
+        detailContainer.innerHTML = detailHTML;
+    }
+}
+
+// fin ajout fonction
 
 function augmenterQuantite(index) {
     panier[index].quantite += 1;
@@ -464,22 +790,74 @@ function updateBadgeNavbar() {
 
 function updateBoutonPaiement() {
     const btnPaiement = document.getElementById('btn-paiement');
-    const heureRetrait = document.getElementById('heure-retrait').value;
+    const dateRetrait = document.getElementById('date-retrait').value;
     
-    btnPaiement.disabled = panier.length === 0 || !heureRetrait;
+    btnPaiement.disabled = panier.length === 0 || !dateRetrait || !creneauSelectionne;
 }
 
+// Fonction pour récupérer le CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Fonction pour procéder au paiement avec Stripe
 function procederPaiement() {
-    const heureRetrait = document.getElementById('heure-retrait').value;
-    if (panier.length > 0 && heureRetrait) {
-        const modal = new bootstrap.Modal(document.getElementById('modalPaiement'));
-        modal.show();
+    const dateRetrait = document.getElementById('date-retrait').value;
+    if (panier.length > 0 && dateRetrait && creneauSelectionne) {
+        // Stocker les infos de collecte
+        const infoCollecte = {
+            date: dateRetrait,
+            heure: creneauSelectionne
+        };
         
-        // TODO: Intégration Stripe
-        // Après 2 secondes, rediriger vers Stripe
-        setTimeout(() => {
-            // window.location.href = '/paiement/stripe/';
-        }, 2000);
+        // Désactiver le bouton pour éviter les doubles clics
+        const btnPaiement = document.getElementById('btn-paiement');
+        btnPaiement.disabled = true;
+        btnPaiement.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Redirection...';
+        
+        // Créer la session de paiement
+        fetch('/paiement/creer-session/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                panier: panier,
+                infoCollecte: infoCollecte
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sessionId) {
+                // Sauvegarder les infos avant redirection
+                localStorage.setItem('infoCollecte', JSON.stringify(infoCollecte));
+                
+                // Rediriger vers Stripe Checkout
+                stripe.redirectToCheckout({ sessionId: data.sessionId });
+            } else {
+                alert('Erreur lors de la création du paiement');
+                btnPaiement.disabled = false;
+                btnPaiement.innerHTML = '<i class="fas fa-lock me-2"></i>Procéder au paiement';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur de connexion');
+            btnPaiement.disabled = false;
+            btnPaiement.innerHTML = '<i class="fas fa-lock me-2"></i>Procéder au paiement';
+        });
     }
 }
 </script>

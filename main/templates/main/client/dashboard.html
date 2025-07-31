@@ -1,0 +1,121 @@
+{% extends "main/bases/base_client.html" %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cartes statistiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-beige rounded-circle p-3">
+                            <i class="fas fa-euro-sign text-brown fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Chiffre d'affaires</h6>
+                            <h3 class="mb-0 text-brown">856,50 €</h3>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> +12.5%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-beige rounded-circle p-3">
+                            <i class="fas fa-shopping-cart text-brown fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Commandes aujourd'hui</h6>
+                            <h3 class="mb-0 text-brown">45</h3>
+                            <small class="text-success"><i class="fas fa-arrow-up"></i> +8.3%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-beige rounded-circle p-3">
+                            <i class="fas fa-box text-brown fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Stocks faibles</h6>
+                            <h3 class="mb-0 text-brown">5</h3>
+                            <small class="text-warning">À commander</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 bg-beige rounded-circle p-3">
+                            <i class="fas fa-users text-brown fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Personnel présent</h6>
+                            <h3 class="mb-0 text-brown">8/10</h3>
+                            <small class="text-success">En service</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et tableaux -->
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-brown text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Évolution du CA</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-orange active">24h</button>
+                        <button class="btn btn-sm btn-orange">7j</button>
+                        <button class="btn btn-sm btn-orange">30j</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0">Produits populaires</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Baguette Tradition</span>
+                        <span class="badge bg-orange">156 vendus</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Croissant</span>
+                        <span class="badge bg-orange">98 vendus</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Pain au chocolat</span>
+                        <span class="badge bg-orange">87 vendus</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Pain aux céréales</span>
+                        <span class="badge bg-orange">45 vendus</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

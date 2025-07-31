@@ -1,0 +1,306 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block title %}Vérification - {{ boulangerie.nom }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .verification-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        background-color: #f8f9fa;
+    }
+    
+    .verification-box {
+        background: white;
+        padding: 3rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        max-width: 450px;
+        width: 100%;
+    }
+    
+    .brand-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        background-color: #ff6b35;
+        border-radius: 50%;
+        margin: 0 auto;
+    }
+    
+    .brand-icon i {
+        color: white;
+    }
+    
+    .code-input-container {
+        position: relative;
+    }
+    
+    .code-input {
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+        letter-spacing: 1rem;
+        padding: 1rem;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        transition: border-color 0.3s;
+    }
+    
+    .code-input:focus {
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    }
+    
+    .timer-container {
+        font-size: 1.1rem;
+    }
+    
+    .timer {
+        font-weight: bold;
+        color: #ff6b35;
+        font-size: 1.5rem;
+    }
+    
+    .btn-orange {
+        background-color: #ff6b35;
+        color: white;
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-orange:hover {
+        background-color: #e55a2b;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+    }
+    
+    .btn-outline-brown {
+        color: #5d4e37;
+        border: 2px solid #5d4e37;
+        background: transparent;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-outline-brown:hover:not(:disabled) {
+        background-color: #5d4e37;
+        color: white;
+    }
+    
+    .btn-outline-brown:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .text-orange {
+        color: #ff6b35 !important;
+    }
+    
+    .text-brown {
+        color: #5d4e37 !important;
+    }
+    
+    .text-brown:hover {
+        color: #3d3426 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verification-container">
+    <div class="verification-box">
+        <div class="text-center mb-4">
+            <div class="brand-icon mb-3">
+                <i class="fas fa-shield-alt fa-3x"></i>
+            </div>
+            <h3 class="text-brown fw-bold">Vérification de votre compte</h3>
+            <p class="text-muted">Un code à 6 chiffres a été envoyé à votre adresse email</p>
+        </div>
+        
+        <form id="form-verification">
+            {% csrf_token %}
+            <div class="code-input-container mb-4">
+                <input type="text" class="form-control code-input" maxlength="6" 
+                       id="code-verification" placeholder="000000" required 
+                       autocomplete="off">
+            </div>
+            
+            <div class="timer-container text-center mb-4">
+                <span class="timer" id="timer">60</span>
+                <span class="text-muted">secondes restantes</span>
+            </div>
+            
+            <button type="submit" class="btn btn-orange w-100 py-3 mb-3">
+                <i class="fas fa-check me-2"></i>Vérifier le code
+            </button>
+            
+            <button type="button" class="btn btn-outline-brown w-100 py-2" 
+                    id="btn-renvoyer" onclick="renvoyerCode()" disabled>
+                <i class="fas fa-redo me-2"></i>Renvoyer un nouveau code
+            </button>
+        </form>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'connexion' %}" class="text-brown text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Retour à la connexion
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Toast pour les notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let timeLeft = 60;
+    let timerInterval;
+    const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+    
+    // Fonction pour afficher les notifications
+    function showNotification(message, isError = false) {
+        const toastEl = document.getElementById('liveToast');
+        const toastBody = toastEl.querySelector('.toast-body');
+        
+        toastBody.textContent = message;
+        toastEl.classList.remove('text-bg-success', 'text-bg-danger');
+        toastEl.classList.add(isError ? 'text-bg-danger' : 'text-bg-success');
+        
+        toast.show();
+    }
+    
+    // Démarrer le timer
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('btn-renvoyer').disabled = false;
+                document.getElementById('timer').parentElement.innerHTML = 
+                    '<span class="text-danger">Code expiré</span>';
+            }
+        }, 1000);
+    }
+    
+    // Formater l'input du code
+    document.getElementById('code-verification').addEventListener('input', function(e) {
+        // Garder seulement les chiffres
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        // Soumettre automatiquement si 6 chiffres
+        if (this.value.length === 6) {
+            document.getElementById('form-verification').dispatchEvent(new Event('submit'));
+        }
+    });
+    
+    // Gérer la soumission
+    document.getElementById('form-verification').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const code = document.getElementById('code-verification').value;
+        
+        if (code.length !== 6) {
+            showNotification('Veuillez entrer un code à 6 chiffres', true);
+            return;
+        }
+        
+        const formData = new FormData(this);
+        formData.append('code', code);
+        
+        // Désactiver le bouton pendant la vérification
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Vérification...';
+        
+        fetch('/verification-code/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Code vérifié avec succès !');
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 1000);
+            } else {
+                showNotification(data.error || 'Code invalide', true);
+                document.getElementById('code-verification').value = '';
+                document.getElementById('code-verification').focus();
+                
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Vérifier le code';
+            }
+        })
+        .catch(error => {
+            showNotification('Une erreur est survenue', true);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Vérifier le code';
+        });
+    });
+    
+    // Renvoyer le code
+    function renvoyerCode() {
+        const btnRenvoyer = document.getElementById('btn-renvoyer');
+        btnRenvoyer.disabled = true;
+        btnRenvoyer.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...';
+        
+        fetch('/renvoyer-code/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Réinitialiser
+                timeLeft = 60;
+                document.getElementById('code-verification').value = '';
+                document.getElementById('timer').parentElement.innerHTML = 
+                    '<span class="timer" id="timer">60</span><span class="text-muted"> secondes restantes</span>';
+                clearInterval(timerInterval);
+                startTimer();
+                showNotification('Un nouveau code a été envoyé à votre adresse email');
+                
+                btnRenvoyer.innerHTML = '<i class="fas fa-redo me-2"></i>Renvoyer un nouveau code';
+            } else {
+                showNotification(data.error || 'Erreur lors de l\'envoi', true);
+                btnRenvoyer.disabled = false;
+                btnRenvoyer.innerHTML = '<i class="fas fa-redo me-2"></i>Renvoyer un nouveau code';
+            }
+        })
+        .catch(error => {
+            showNotification('Une erreur est survenue', true);
+            btnRenvoyer.disabled = false;
+            btnRenvoyer.innerHTML = '<i class="fas fa-redo me-2"></i>Renvoyer un nouveau code';
+        });
+    }
+    
+    // Focus sur le champ au chargement
+    document.getElementById('code-verification').focus();
+    
+    // Démarrer le timer au chargement
+    startTimer();
+</script>
+{% endblock %}

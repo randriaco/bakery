@@ -1,0 +1,105 @@
+{% extends 'main/bases/base_gerant.html' %}
+
+{% block title %}Fréquence de collecte - Gérant{% endblock %}
+
+{% block page_title %}Fréquence de collecte{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-clock me-2"></i>Fréquence
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label text-brown fw-bold">
+                                <i class="fas fa-hourglass-half me-2"></i>Intervalle
+                            </label>
+                            <p class="text-muted small mb-3">
+                                Temps entre chaque créneau de collecte disponible
+                            </p>
+                            {{ form.intervalle }}
+                            {% if form.intervalle.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.intervalle.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-orange px-5 py-2">
+                                <i class="fas fa-save me-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-beige">
+                    <h5 class="mb-0 text-brown fw-bold">
+                        <i class="fas fa-info-circle me-2"></i>Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        La fréquence détermine l'intervalle de temps entre chaque créneau de collecte disponible pour vos clients.
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-lightbulb me-2"></i>Exemple
+                        </h6>
+                        <p class="mb-0">
+                            Si vous choisissez <strong>30 minutes</strong> et que vos horaires sont de 9h00 à 11h00, 
+                            les créneaux disponibles seront : 9h00, 9h30, 10h00, 10h30 et 11h00.
+                        </p>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <p class="text-muted small mb-0">
+                            <i class="fas fa-clock me-2"></i>Dernière modification : 
+                            {% if frequence.date_modification %}
+                                {{ frequence.date_modification|date:"d/m/Y à H:i" }}
+                            {% else %}
+                                Jamais
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+            <div class="toast show" role="alert">
+                <div class="toast-header bg-success text-white">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong class="me-auto">Succès</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.toast').classList.remove('show');
+            }, 3000);
+        </script>
+    {% endfor %}
+{% endif %}
+{% endblock %}

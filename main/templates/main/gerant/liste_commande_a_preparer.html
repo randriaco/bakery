@@ -1,0 +1,324 @@
+{% extends 'main/bases/base_gerant.html' %}
+
+{% load static %}
+
+{% block page_title %}Préparation des commandes{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+  
+  <!-- En-tête -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">
+          <i class="fas fa-clipboard-list me-2"></i>Commandes à préparer
+        </h3>
+        <a href="{% url 'dashboard_gerant_commandes' %}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Liste des commandes à préparer -->
+  <div class="row" id="listeCommandesPreparation">
+    {% for commande in commandes_a_preparer %}
+    <div class="col-lg-6 mb-4 commande-preparation-card" data-commande-id="{{ commande.id }}">
+      <div class="card h-100 shadow-sm border-0">
+        
+        <!-- En-tête de la commande -->
+        <div class="card-header bg-{{ commande.get_statut_display_class }} text-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0">
+                <i class="fas fa-receipt me-2"></i>Commande #{{ commande.numero_commande }}
+              </h5>
+              <small>Heure de retrait : {{ commande.heure_collecte|time:"H:i" }}</small>
+            </div>
+            <span class="badge bg-light text-dark">
+              {{ commande.get_statut_display }}
+            </span>
+          </div>
+        </div>
+        
+        <!-- Informations client -->
+        <div class="card-body">
+          <div class="mb-3 pb-3 border-bottom">
+            <h6 class="text-muted mb-1">Client</h6>
+            <p class="mb-0 fw-bold">{{ commande.client.get_full_name }}</p>
+            <small class="text-muted">{{ commande.client.email }}</small>
+          </div>
+          
+          <!-- Liste détaillée des produits -->
+          <div class="mb-3">
+            <h6 class="text-primary mb-3">
+              <i class="fas fa-shopping-basket me-2"></i>Produits à préparer
+            </h6>
+            
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                  <tr>
+                    <th class="text-center" width="80">Quantité</th>
+                    <th>Produit</th>
+                    <th width="40" class="text-center">✓</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for ligne in commande.lignes.all %}
+                  <tr class="ligne-produit">
+                    <td class="text-center fw-bold fs-5 text-primary">
+                      {{ ligne.quantite }}
+                    </td>
+                    <td>
+                      <strong>{{ ligne.nom_produit }}</strong>
+                      <br>
+                      <small class="text-muted">{{ ligne.categorie }}</small>
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input check-produit" 
+                             data-ligne-id="{{ ligne.id }}">
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Résumé -->
+            <div class="alert alert-light border mt-3 mb-0">
+              <div class="row">
+                <div class="col">
+                  <small class="text-muted">Total articles :</small>
+                  <strong class="d-block">{{ commande.lignes.count }} référence(s)</strong>
+                </div>
+                <div class="col text-end">
+                  <small class="text-muted">Montant total :</small>
+                  <strong class="d-block text-orange">{{ commande.total }}€</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="card-footer bg-light border-0">
+          {% if commande.statut == 'payee' %}
+          <button class="btn btn-warning w-100 btn-commencer-preparation"
+                  onclick="commencerPreparation('{{ commande.id }}')">
+            <i class="fas fa-play me-2"></i>Commencer la préparation
+          </button>
+          {% elif commande.statut == 'en_preparation' %}
+          <button class="btn btn-success w-100 btn-commande-prete"
+                  onclick="marquerCommePrete('{{ commande.id }}')"
+                  id="btn-prete-{{ commande.id }}">
+            <i class="fas fa-check-circle me-2"></i>Commande Prête
+          </button>
+          <div class="alert alert-success mb-0 d-none" id="msg-terminee-{{ commande.id }}">
+            <i class="fas fa-check-double me-2"></i>
+            <strong>Commande Terminée</strong>
+            <br>
+            <small>Code envoyé au client</small>
+          </div>
+          {% elif commande.statut == 'prete' %}
+          <div class="alert alert-success mb-0">
+            <i class="fas fa-check-double me-2"></i>
+            <strong>Commande Terminée</strong>
+            <br>
+            <small>En attente de récupération</small>
+          </div>
+          {% endif %}
+        </div>
+        
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+          <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+          <h4 class="text-muted">Aucune commande à préparer</h4>
+          <p class="text-muted">Toutes les commandes sont prêtes ou récupérées !</p>
+          <a href="{% url 'dashboard_gerant_commandes' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+/* Styles spécifiques pour la préparation */
+.commande-preparation-card {
+  transition: all 0.3s ease;
+}
+
+.ligne-produit {
+  transition: background-color 0.3s ease;
+}
+
+.ligne-produit:has(.check-produit:checked) {
+  background-color: #d4edda !important;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.check-produit {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.table-bordered {
+  border-color: #dee2e6;
+}
+
+.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.text-orange {
+  color: #fd7e14 !important;
+}
+
+/* Animation pour les boutons */
+.btn-commande-prete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .commande-preparation-card {
+    margin-bottom: 1rem;
+  }
+}
+</style>
+
+<script>
+// Fonction pour commencer la préparation
+function commencerPreparation(commandeId) {
+  fetch(`/changer-statut-commande/${commandeId}/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ statut: 'en_preparation' })
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        showNotification('success', 'Préparation commencée !');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showNotification('danger', d.error || 'Erreur');
+      }
+    });
+}
+
+// Fonction pour marquer comme prête
+function marquerCommePrete(commandeId) {
+  const btn = document.getElementById(`btn-prete-${commandeId}`);
+  const msgTerminee = document.getElementById(`msg-terminee-${commandeId}`);
+  
+  // Désactiver le bouton
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi du code...';
+  
+  fetch(`/changer-statut-commande/${commandeId}/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: JSON.stringify({ statut: 'prete' })
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        // Masquer le bouton et afficher le message
+        btn.classList.add('d-none');
+        msgTerminee.classList.remove('d-none');
+        
+        showNotification('success', 'Commande prête ! Code envoyé au client.');
+        
+        // Retirer la commande après 3 secondes
+        setTimeout(() => {
+          const card = document.querySelector(`[data-commande-id="${commandeId}"]`);
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9)';
+          setTimeout(() => {
+            card.remove();
+            // Vérifier s'il reste des commandes
+            checkCommandesRestantes();
+          }, 300);
+        }, 3000);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Commande Prête';
+        showNotification('danger', d.error || 'Erreur');
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Commande Prête';
+      showNotification('danger', 'Erreur lors de l\'envoi');
+    });
+}
+
+// Vérifier s'il reste des commandes
+function checkCommandesRestantes() {
+  const commandesRestantes = document.querySelectorAll('.commande-preparation-card').length;
+  if (commandesRestantes === 0) {
+    location.reload();
+  }
+}
+
+// Gestion des checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+  // Sauvegarder l'état des checkboxes dans le localStorage
+  const checkboxes = document.querySelectorAll('.check-produit');
+  
+  checkboxes.forEach(checkbox => {
+    // Restaurer l'état depuis localStorage
+    const ligneId = checkbox.dataset.ligneId;
+    const isChecked = localStorage.getItem(`ligne-${ligneId}`) === 'true';
+    checkbox.checked = isChecked;
+    
+    // Sauvegarder l'état au changement
+    checkbox.addEventListener('change', function() {
+      localStorage.setItem(`ligne-${ligneId}`, this.checked);
+    });
+  });
+});
+
+// Fonction pour afficher les notifications
+function showNotification(type, message) {
+  const alert = document.createElement('div');
+  alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+  alert.style.zIndex = '9999';
+  alert.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+    ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  document.body.appendChild(alert);
+  setTimeout(() => alert.remove(), 5000);
+}
+
+// Auto-refresh toutes les 60 secondes
+setInterval(() => {
+  location.reload();
+}, 60000);
+</script>
+
+{% endblock %}

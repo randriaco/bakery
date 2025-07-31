@@ -1,0 +1,120 @@
+{% extends 'main/bases/base.html' %}
+{% load static %}
+
+{% block title %}Commande confirmée{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Carte de confirmation -->
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Icône de succès -->
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <!-- Message de confirmation -->
+                    <h2 class="text-brown mb-4">Commande confirmée !</h2>
+                    
+                    <p class="lead mb-4">
+                        Merci pour votre commande <strong>{{ commande.client.first_name|default:commande.client.username }}</strong> !
+                    </p>
+                    
+                    <!-- Détails de la commande -->
+                    <div class="bg-light rounded p-4 mb-4">
+                        <h4 class="text-brown mb-3">Commande n°{{ commande.numero_commande }}</h4>
+                        
+                        <div class="row text-start">
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-euro-sign me-2"></i>Montant total :</strong>
+                                <span class="text-orange fw-bold">{{ commande.total }}€</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-calendar me-2"></i>Date de retrait :</strong>
+                                {{ commande.date_collecte|date:"d/m/Y" }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-clock me-2"></i>Heure de retrait :</strong>
+                                {{ commande.heure_collecte|time:"H:i" }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-map-marker-alt me-2"></i>Lieu :</strong>
+                                {{ boulangerie.nom }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Info email -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-envelope me-2"></i>
+                        Un email de confirmation avec votre facture a été envoyé à <strong>{{ commande.client.email }}</strong>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'mes_commandes' %}" class="btn btn-orange btn-lg">
+                            <i class="fas fa-list me-2"></i>Voir mes commandes
+                        </a>
+                        <a href="{% url 'commander' %}" class="btn btn-outline-brown btn-lg">
+                            <i class="fas fa-shopping-basket me-2"></i>Nouvelle commande
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Informations supplémentaires -->
+            <div class="card mt-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-brown mb-3">
+                        <i class="fas fa-info-circle me-2"></i>Informations importantes
+                    </h5>
+                    <ul class="mb-0">
+                        <li>Présentez-vous à l'heure convenue pour récupérer votre commande</li>
+                        <li>Munissez-vous de votre numéro de commande : <strong>{{ commande.numero_commande }}</strong></li>
+                        <li>En cas d'empêchement, merci de nous prévenir au {{ boulangerie.telephone }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour vider le panier après confirmation -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Vider le panier du localStorage
+    localStorage.removeItem('panier');
+    localStorage.removeItem('infoCollecte');
+    localStorage.removeItem('paiement_en_cours');
+    
+    // Mettre à jour le badge du panier dans la navbar
+    const badges = document.querySelectorAll('.navbar .badge');
+    badges.forEach(badge => {
+        badge.textContent = '0';
+        badge.style.display = 'none';
+    });
+    
+    console.log('Panier vidé avec succès');
+});
+</script>
+
+<style>
+.btn-outline-brown {
+    color: var(--color-brown);
+    border: 2px solid var(--color-brown);
+    background-color: transparent;
+}
+
+.btn-outline-brown:hover {
+    background-color: var(--color-brown);
+    color: white;
+    border-color: var(--color-brown);
+}
+
+.text-orange {
+    color: var(--color-orange) !important;
+}
+</style>
+{% endblock %}

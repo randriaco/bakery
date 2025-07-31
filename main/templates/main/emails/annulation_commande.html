@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annulation de commande</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #dc3545;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+        .info-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+        .refund-box {
+            background-color: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ boulangerie.nom }}</h1>
+        <p style="margin: 0;">Annulation de commande</p>
+    </div>
+    
+    <div class="content">
+        <h2>Bonjour {{ commande.client.first_name|default:commande.client.username }},</h2>
+        
+        <p>Nous vous confirmons l'annulation de votre commande conformément à votre demande.</p>
+        
+        <div class="info-box">
+            <h3>Détails de la commande annulée</h3>
+            <p><strong>N° de commande :</strong> {{ commande.numero_commande }}</p>
+            <p><strong>Date de commande :</strong> {{ commande.date_commande|date:"d/m/Y à H:i" }}</p>
+            <p><strong>Montant :</strong> {{ commande.total }}€</p>
+            <p><strong>Date d'annulation :</strong> {% now "d/m/Y à H:i" %}</p>
+        </div>
+        
+        <div class="refund-box">
+            <h3>💳 Remboursement</h3>
+            <p><strong>Montant remboursé :</strong> {{ commande.total }}€</p>
+            <p>Le remboursement sera effectué sur le moyen de paiement utilisé lors de la commande.</p>
+            <p><em>Délai de remboursement : 5 à 10 jours ouvrés selon votre banque.</em></p>
+        </div>
+        
+        <p>Si vous avez des questions concernant cette annulation ou le remboursement, n'hésitez pas à nous contacter.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p>Nous espérons vous revoir bientôt !</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p><strong>{{ boulangerie.nom }}</strong><br>
+        {{ boulangerie.adresse }}, {{ boulangerie.code }} {{ boulangerie.ville }}<br>
+        Tél : {{ boulangerie.telephone }}</p>
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="font-size: 12px; color: #999;">
+            Cet email a été envoyé automatiquement suite à votre demande d'annulation.<br>
+            Pour toute question, contactez-nous au {{ boulangerie.telephone }}
+        </p>
+    </div>
+</body>
+</html>

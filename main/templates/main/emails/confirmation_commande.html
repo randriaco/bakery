@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de commande</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #8B4513;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+        .order-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+        .order-details {
+            margin: 20px 0;
+        }
+        .order-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .order-details th {
+            background-color: #f0f0f0;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+        .order-details td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        .pickup-info {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #b8e0f0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #d2691e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        .icon {
+            display: inline-block;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ boulangerie.nom }}</h1>
+        <p style="margin: 0;">Confirmation de commande</p>
+    </div>
+    
+    <div class="content">
+        <h2>Bonjour {{ commande.client.first_name|default:commande.client.username }},</h2>
+        
+        <p>Nous avons le plaisir de vous confirmer que votre commande a été enregistrée avec succès !</p>
+        
+        <div class="order-box">
+            <h3>Commande n°{{ commande.numero_commande }}</h3>
+            <p><strong>Date de commande :</strong> {{ commande.date_commande|date:"d/m/Y à H:i" }}</p>
+            <p><strong>Statut :</strong> <span style="color: #28a745;">✓ Payée</span></p>
+        </div>
+        
+        <div class="pickup-info">
+            <h3>📍 Informations de retrait</h3>
+            <p><strong>Date :</strong> {{ commande.date_collecte|date:"l d F Y" }}</p>
+            <p><strong>Heure :</strong> {{ commande.heure_collecte|time:"H:i" }}</p>
+            <p><strong>Adresse :</strong><br>
+            {{ boulangerie.nom }}<br>
+            {{ boulangerie.adresse }}<br>
+            {{ boulangerie.code }} {{ boulangerie.ville }}<br>
+            Tél : {{ boulangerie.telephone }}</p>
+        </div>
+        
+        <div class="order-details">
+            <h3>Détail de votre commande</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th style="text-align: center;">Qté</th>
+                        <th style="text-align: right;">Prix unit.</th>
+                        <th style="text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in lignes %}
+                    <tr>
+                        <td>
+                            {{ ligne.nom_produit }}<br>
+                            <small style="color: #666;">{{ ligne.categorie }}</small>
+                        </td>
+                        <td style="text-align: center;">{{ ligne.quantite }}</td>
+                        <td style="text-align: right;">{{ ligne.prix_unitaire }}€</td>
+                        <td style="text-align: right;">{{ ligne.sous_total }}€</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3" style="text-align: right;"><strong>Sous-total :</strong></td>
+                        <td style="text-align: right;"><strong>{{ commande.sous_total }}€</strong></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: right;">Frais de service :</td>
+                        <td style="text-align: right;">{{ commande.frais_service }}€</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right; font-size: 18px;">TOTAL :</td>
+                        <td style="text-align: right; font-size: 18px; color: #d2691e;">{{ commande.total }}€</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="background-color: #fff9e6; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffd700;">
+            <h4 style="margin-top: 0;">⚠️ Important</h4>
+            <ul>
+                <li>Présentez-vous à l'heure prévue pour récupérer votre commande</li>
+                <li>Munissez-vous de votre numéro de commande : <strong>{{ commande.numero_commande }}</strong></li>
+                <li>Votre facture est disponible en pièce jointe</li>
+                <li>En cas d'empêchement, merci de nous prévenir au {{ boulangerie.telephone }}</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p>Vous pouvez consulter vos commandes à tout moment depuis votre espace client.</p>
+            <a href="{{ request.build_absolute_uri }}/mes-commandes/" class="btn">Mes commandes</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Merci pour votre confiance !</p>
+        <p><strong>{{ boulangerie.nom }}</strong><br>
+        {{ boulangerie.adresse }}, {{ boulangerie.code }} {{ boulangerie.ville }}<br>
+        Tél : {{ boulangerie.telephone }}</p>
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="font-size: 12px; color: #999;">
+            Cet email a été envoyé automatiquement. Merci de ne pas y répondre.<br>
+            Pour toute question, contactez-nous au {{ boulangerie.telephone }}
+        </p>
+    </div>
+</body>
+</html>
