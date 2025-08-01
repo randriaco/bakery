@@ -89,4 +89,11 @@ urlpatterns = [
     path('valider-code-recuperation/<int:commande_id>/', views.valider_code_recuperation, name='valider_code_recuperation'),
     path('api/commande/<int:commande_id>/statut/', views.api_commande_statut, name='api_commande_statut'),
     path('gerant/preparation-commandes/', views.liste_commande_a_preparer, name='liste_commande_a_preparer'),
+
+    # Pages Personnel
+    path('personnel/', views.dashboard_personnel, name='dashboard_personnel'),
+    path('personnel/parametres/', views.parametres_personnel, name='parametres_personnel'),
+    path('personnel/notifications/', views.notifications_personnel, name='notifications_personnel'),
+    path('personnel/historique-commandes/', views.historique_commandes_personnel, name='historique_commandes_personnel'),
+    
 ]

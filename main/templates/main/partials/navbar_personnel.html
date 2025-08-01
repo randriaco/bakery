@@ -1,0 +1,66 @@
+<!-- Bouton Menu Burger -->
+<button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar Personnel -->
+<nav class="sidebar">
+    <!-- Info personnel -->
+    <div class="boulangerie-info">
+        <h5 class="text-center mb-3">
+            <i class="fas fa-user-tie"></i> 
+            {{ user.get_full_name|default:user.username }}
+        </h5>
+        <p class="text-center">
+            <span class="badge bg-orange text-white">Personnel</span>
+        </p>
+        <hr class="my-3">
+        <p class="small text-center mb-0">
+            <i class="fas fa-store me-1"></i>
+            {{ boulangerie.nom|default:"Pain Doré" }}
+        </p>
+    </div>
+
+    <!-- Menu navigation -->
+    <div class="nav-header">===== Principal =====</div>
+    <div class="nav flex-column">
+        <a href="{% url 'dashboard_personnel' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard_personnel' %}active{% endif %}">
+            <i class="fas fa-home me-2"></i> Tableau de bord
+        </a>
+    </div>
+
+    <div class="nav-header">===== Commandes =====</div>
+    <div class="nav flex-column">
+        <a href="{% url 'liste_commande_a_preparer' %}" class="nav-link {% if request.resolver_match.url_name == 'liste_commande_a_preparer' %}active{% endif %}">
+            <i class="fas fa-clipboard-list me-2"></i> 
+            À préparer
+            {% if commandes_en_attente_count > 0 %}
+                <span class="badge bg-danger ms-auto">{{ commandes_en_attente_count }}</span>
+            {% endif %}
+        </a>
+        <a href="{% url 'historique_commandes_personnel' %}" class="nav-link {% if request.resolver_match.url_name == 'historique_commandes_personnel' %}active{% endif %}">
+            <i class="fas fa-history me-2"></i> Historique du jour
+        </a>
+    </div>
+
+    <div class="nav-header">===== Mon compte =====</div>
+    <div class="nav flex-column">
+        <a href="{% url 'parametres_personnel' %}" class="nav-link {% if request.resolver_match.url_name == 'parametres_personnel' %}active{% endif %}">
+            <i class="fas fa-user-cog me-2"></i> Mes paramètres
+        </a>
+        <a href="{% url 'notifications_personnel' %}" class="nav-link {% if request.resolver_match.url_name == 'notifications_personnel' %}active{% endif %}">
+            <i class="fas fa-bell me-2"></i> 
+            Notifications
+            {% if notifications_count > 0 %}
+                <span class="badge bg-warning text-dark ms-auto">{{ notifications_count }}</span>
+            {% endif %}
+        </a>
+    </div>
+
+    <div class="nav-header">===== Session =====</div>
+    <div class="nav flex-column mb-3">
+        <a href="{% url 'deconnexion' %}" class="nav-link logout-link">
+            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+        </a>
+    </div>
+</nav>

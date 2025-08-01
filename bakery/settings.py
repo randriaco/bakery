@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'main.context_processors.pretes_count',
+                'main.context_processors.personnel_context',
             ],
         },
     },
@@ -154,6 +155,4 @@ LOGIN_URL = 'login'          # = le name='login' défini ci-dessus
 LOGIN_REDIRECT_URL = 'dashboard_gerant'
 
 # Stripe Configuration
-
-
 

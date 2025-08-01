@@ -109,6 +109,9 @@ from django.shortcuts import render, redirect
 
 from .forms import CreerPersonnelForm  # Ajoutez ceci à vos imports
 
+from django.db.models import Q, Count
+from datetime import datetime, timedelta
+
 # pour proteger les pages gerant
 
 def is_gerant(user):
@@ -1476,7 +1479,7 @@ def connexion_pro(request):
                 elif user.groups.filter(name='Gerants').exists():
                     return redirect('dashboard_gerant')
                 elif user.groups.filter(name='Personnel').exists():
-                    return redirect('liste_commande_a_preparer')
+                    return redirect('dashboard_personnel')  # MODIFIÉ ICI
                 else:
                     return redirect('dashboard_gerant')
 
@@ -1514,8 +1517,8 @@ def ajax_connexion(request):
                     # Gérant - vers dashboard gérant
                     redirect_url = '/gerant/'
                 elif user.groups.filter(name='Personnel').exists():
-                    # Personnel - vers page de préparation des commandes
-                    redirect_url = '/gerant/preparation-commandes/'
+                    # Personnel - vers dashboard personnel (MODIFIÉ ICI)
+                    redirect_url = '/personnel/'
                 else:
                     # Client par défaut - vers page commander
                     redirect_url = '/commander/'
@@ -2443,5 +2446,192 @@ L'équipe {boulangerie.nom}
         [user.email],
         fail_silently=False,
     )
+
+# compte personnel
+
+@login_required  # Ou @login_required si pas de décorateur
+def dashboard_personnel(request):
+    """Tableau de bord du personnel"""
+    # Vérifier que l'utilisateur est bien du personnel (si pas de décorateur)
+    # if not request.user.groups.filter(name='Personnel').exists():
+    #     return redirect('accueil')
+    
+    today = timezone.now().date()
+    now = timezone.now()
+    
+    # Commandes du jour
+    commandes_jour = Commande.objects.filter(
+        date_collecte=today
+    ).exclude(statut__in=['annulee', 'en_attente'])
+    
+    # Statistiques des commandes
+    stats = {
+        'total_jour': commandes_jour.count(),
+        'a_preparer': commandes_jour.filter(statut='payee').count(),
+        'en_preparation': commandes_jour.filter(statut='en_preparation').count(),
+        'pretes': commandes_jour.filter(statut='prete').count(),
+        'recuperees': commandes_jour.filter(statut='recuperee').count(),
+    }
+    
+    # Commandes urgentes (dans l'heure qui suit)
+    heure_limite = now + timedelta(hours=1)
+    commandes_urgentes = commandes_jour.filter(
+        statut__in=['payee', 'en_preparation'],
+        date_collecte=today,
+        heure_collecte__lte=heure_limite.time()
+    ).order_by('heure_collecte')[:5]
+    
+    # Prochaines commandes à préparer
+    prochaines_commandes = commandes_jour.filter(
+        statut='payee'
+    ).order_by('heure_collecte')[:10]
+    
+    # Notifications non lues (si vous avez un système de notifications)
+    # notifications = NotificationPersonnel.objects.filter(
+    #     destinataire=request.user,
+    #     lue=False
+    # ).count()
+    
+    # Performance personnelle du jour
+    commandes_traitees = commandes_jour.filter(
+        Q(statut='prete') | Q(statut='recuperee'),
+        # Si vous trackez qui a préparé la commande :
+        # preparee_par=request.user
+    ).count()
+    
+    # Graphique des commandes par heure
+    commandes_par_heure = []
+    for hour in range(7, 21):  # De 7h à 20h
+        count = commandes_jour.filter(
+            heure_collecte__hour=hour
+        ).count()
+        commandes_par_heure.append({
+            'heure': f"{hour}h",
+            'nombre': count
+        })
+    
+    context = {
+        'boulangerie': get_boulangerie(),
+        'stats': stats,
+        'commandes_urgentes': commandes_urgentes,
+        'prochaines_commandes': prochaines_commandes,
+        'commandes_traitees': commandes_traitees,
+        'commandes_par_heure': commandes_par_heure,
+        'today': today,
+        'commandes_en_attente_count': stats['a_preparer'],  # Pour la navbar
+        'notifications_count': 0,  # À remplacer par le vrai compte
+    }
+    
+    return render(request, 'main/personnel/dashboard_personnel.html', context)
+
+@login_required  # Ou @login_required
+def parametres_personnel(request):
+    """Vue pour les paramètres du compte personnel"""
+    # Vérifier que l'utilisateur est bien du personnel (si pas de décorateur)
+    # if not request.user.groups.filter(name='Personnel').exists():
+    #     return redirect('accueil')
+    
+    user = request.user
+    
+    # Initialiser les formulaires avec les données existantes
+    initial_data = {
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'telephone': user.profile.telephone if hasattr(user, 'profile') else ''
+    }
+    
+    # Utiliser le même formulaire que pour le gérant
+    info_form = GerantInfoForm(initial=initial_data)
+    password_form = CustomPasswordChangeForm(request.user)
+    
+    if request.method == 'POST':
+        # Déterminer quel formulaire a été soumis
+        if 'save_info' in request.POST:
+            # Le personnel peut seulement modifier son téléphone
+            info_form = GerantInfoForm(request.POST)
+            if info_form.is_valid():
+                # Mettre à jour uniquement le téléphone
+                if hasattr(user, 'profile'):
+                    user.profile.telephone = info_form.cleaned_data.get('telephone', '')
+                    user.profile.save()
+                else:
+                    # Créer le profil s'il n'existe pas
+                    from main.models import Profile
+                    Profile.objects.create(
+                        user=user,
+                        telephone=info_form.cleaned_data.get('telephone', '')
+                    )
+                
+                messages.success(request, 'Votre numéro de téléphone a été mis à jour.')
+                return redirect('parametres_personnel')
+        
+        elif 'change_password' in request.POST:
+            # Changement de mot de passe
+            password_form = CustomPasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                # Vérifier que le nouveau mot de passe est bien 6 chiffres
+                new_password = password_form.cleaned_data['new_password1']
+                if len(new_password) != 6 or not new_password.isdigit():
+                    messages.error(request, 'Le mot de passe doit contenir exactement 6 chiffres.')
+                else:
+                    user = password_form.save()
+                    # Garder l'utilisateur connecté après le changement
+                    update_session_auth_hash(request, user)
+                    messages.success(request, 'Votre mot de passe a été modifié avec succès.')
+                    return redirect('parametres_personnel')
+    
+    context = {
+        'info_form': info_form,
+        'password_form': password_form,
+        'boulangerie': get_boulangerie(),
+    }
+    return render(request, 'main/personnel/parametres_personnel.html', context)
+
+@login_required  # Ou @login_required si vous n'avez pas le décorateur
+def notifications_personnel(request):
+    """Vue pour les notifications du personnel"""
+    # Vérifier que l'utilisateur est bien du personnel (si pas de décorateur)
+    # if not request.user.groups.filter(name='Personnel').exists():
+    #     return redirect('accueil')
+    
+    # Pour l'instant, page basique - à développer plus tard
+    context = {
+        'boulangerie': get_boulangerie(),
+        'notifications': [],  # À remplacer par un vrai système de notifications
+    }
+    
+    return render(request, 'main/personnel/notifications_personnel.html', context)
+
+
+@login_required  # Ou @login_required si vous n'avez pas le décorateur
+def historique_commandes_personnel(request):
+    """Vue pour l'historique des commandes du personnel"""
+    # Vérifier que l'utilisateur est bien du personnel (si pas de décorateur)
+    # if not request.user.groups.filter(name='Personnel').exists():
+    #     return redirect('accueil')
+    
+    today = timezone.now().date()
+    
+    # Récupérer toutes les commandes du jour qui ont été traitées
+    commandes_historique = Commande.objects.filter(
+        date_collecte=today,
+        statut__in=['prete', 'recuperee']
+    ).order_by('-date_prete', '-heure_collecte')
+    
+    # Statistiques du jour
+    stats = {
+        'total_preparees': commandes_historique.filter(statut='prete').count(),
+        'total_recuperees': commandes_historique.filter(statut='recuperee').count(),
+    }
+    
+    context = {
+        'boulangerie': get_boulangerie(),
+        'commandes': commandes_historique,
+        'stats': stats,
+        'today': today,
+    }
+    
+    return render(request, 'main/personnel/historique_commandes_personnel.html', context)
 
 

@@ -1,0 +1,312 @@
+{% extends 'main/bases/base_personnel.html' %}
+
+{% block title %}Tableau de bord - {{ boulangerie.nom }}{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Message de bienvenue -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info bg-beige border-0 d-flex align-items-center">
+                <i class="fas fa-sun fa-2x text-orange me-3"></i>
+                <div>
+                    <h5 class="mb-0 text-brown">Bonjour {{ user.first_name }} !</h5>
+                    <p class="mb-0 text-muted">Nous sommes le {{ today|date:"l d F Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cartes de statistiques -->
+    <div class="row mb-4">
+        <!-- Total commandes -->
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card stat-card border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary mb-3">
+                        <i class="fas fa-shopping-basket fa-2x"></i>
+                    </div>
+                    <h3 class="mb-0">{{ stats.total_jour }}</h3>
+                    <p class="text-muted mb-0 small">Commandes du jour</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- À préparer -->
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card stat-card border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning mb-3">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="mb-0">{{ stats.a_preparer }}</h3>
+                    <p class="text-muted mb-0 small">À préparer</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- En préparation -->
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card stat-card border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-info bg-opacity-10 text-info mb-3">
+                        <i class="fas fa-spinner fa-2x"></i>
+                    </div>
+                    <h3 class="mb-0">{{ stats.en_preparation }}</h3>
+                    <p class="text-muted mb-0 small">En préparation</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prêtes -->
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card stat-card border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success mb-3">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                    <h3 class="mb-0">{{ stats.pretes }}</h3>
+                    <p class="text-muted mb-0 small">Prêtes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Colonne gauche : Commandes urgentes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Commandes urgentes (dans l'heure)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if commandes_urgentes %}
+                        <div class="list-group list-group-flush">
+                            {% for commande in commandes_urgentes %}
+                                <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            Commande #{{ commande.numero_commande }}
+                                        </h6>
+                                        <p class="mb-1 text-muted">
+                                            <i class="fas fa-user me-1"></i> {{ commande.client.get_full_name }}
+                                        </p>
+                                        <small class="text-danger fw-bold">
+                                            <i class="fas fa-clock me-1"></i> 
+                                            Retrait : {{ commande.heure_collecte|time:"H:i" }}
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'liste_commande_a_preparer' %}" 
+                                       class="btn btn-sm btn-danger">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4 mb-0">
+                            <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                            Aucune commande urgente
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite : Prochaines commandes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-alt me-2"></i>
+                        Prochaines commandes à préparer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if prochaines_commandes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>N° Commande</th>
+                                        <th>Heure</th>
+                                        <th>Client</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in prochaines_commandes|slice:":5" %}
+                                        <tr>
+                                            <td class="fw-bold">#{{ commande.numero_commande }}</td>
+                                            <td>{{ commande.heure_collecte|time:"H:i" }}</td>
+                                            <td>{{ commande.client.get_full_name|truncatechars:20 }}</td>
+                                            <td>
+                                                <a href="{% url 'liste_commande_a_preparer' %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if prochaines_commandes.count > 5 %}
+                            <div class="text-center mt-3">
+                                <a href="{% url 'liste_commande_a_preparer' %}" class="btn btn-sm btn-orange">
+                                    Voir toutes les commandes ({{ prochaines_commandes.count }})
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted text-center py-4 mb-0">
+                            <i class="fas fa-coffee fa-2x mb-2 d-block"></i>
+                            Aucune commande en attente
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique des commandes par heure -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-brown text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Répartition des commandes par heure
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="commandesChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance personnelle -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light border-0">
+                <div class="card-body text-center py-4">
+                    <h4 class="text-brown mb-3">Votre performance aujourd'hui</h4>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="text-center mx-4">
+                            <i class="fas fa-trophy fa-3x text-warning mb-2"></i>
+                            <h2 class="mb-0 text-brown">{{ commandes_traitees }}</h2>
+                            <p class="text-muted mb-0">Commandes traitées</p>
+                        </div>
+                        <div class="text-center mx-4">
+                            <i class="fas fa-check-double fa-3x text-success mb-2"></i>
+                            <h2 class="mb-0 text-brown">{{ stats.recuperees }}</h2>
+                            <p class="text-muted mb-0">Récupérées</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles spécifiques au dashboard */
+.stat-card {
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-orange {
+    background-color: var(--color-orange) !important;
+    color: white !important;
+    border: none;
+}
+
+.btn-orange:hover {
+    background-color: var(--color-dark-orange) !important;
+}
+
+.bg-beige {
+    background-color: var(--color-beige) !important;
+}
+
+.text-brown {
+    color: var(--color-brown) !important;
+}
+
+.text-orange {
+    color: var(--color-orange) !important;
+}
+
+.bg-brown {
+    background-color: var(--color-brown) !important;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Graphique des commandes par heure
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('commandesChart').getContext('2d');
+    const commandesData = {{ commandes_par_heure|safe }};
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: commandesData.map(item => item.heure),
+            datasets: [{
+                label: 'Nombre de commandes',
+                data: commandesData.map(item => item.nombre),
+                backgroundColor: '#D86B1E',
+                borderColor: '#D86B1E',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

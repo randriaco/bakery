@@ -1,0 +1,279 @@
+{% extends 'main/bases/base_personnel.html' %}
+
+{% block title %}Mes paramètres - {{ boulangerie.nom }}{% endblock %}
+{% block page_title %}Mes paramètres{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Colonne gauche : Informations personnelles -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-brown text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        <strong>Mes informations</strong>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Prénom (lecture seule) -->
+                        <div class="mb-3">
+                            <label for="{{ info_form.first_name.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ info_form.first_name.label }}
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   value="{{ info_form.first_name.value }}"
+                                   readonly
+                                   style="background-color: #f8f9fa; cursor: not-allowed;">
+                            <small class="form-text text-muted">
+                                <i class="fas fa-lock"></i> Non modifiable - Contactez votre gérant pour toute modification
+                            </small>
+                        </div>
+
+                        <!-- Nom (lecture seule) -->
+                        <div class="mb-3">
+                            <label for="{{ info_form.last_name.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ info_form.last_name.label }}
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   value="{{ info_form.last_name.value }}"
+                                   readonly
+                                   style="background-color: #f8f9fa; cursor: not-allowed;">
+                        </div>
+
+                        <!-- Email (lecture seule) -->
+                        <div class="mb-3">
+                            <label for="{{ info_form.email.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ info_form.email.label }}
+                            </label>
+                            {{ info_form.email }}
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Votre identifiant de connexion
+                            </small>
+                        </div>
+
+                        <!-- Téléphone (modifiable) -->
+                        <div class="mb-3">
+                            <label for="{{ info_form.telephone.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ info_form.telephone.label }}
+                            </label>
+                            {{ info_form.telephone }}
+                            {% if info_form.telephone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ info_form.telephone.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Informations supplémentaires -->
+                        <div class="alert alert-info bg-beige border-0 mb-3">
+                            <h6 class="text-brown fw-bold mb-2">
+                                <i class="fas fa-id-card me-2"></i>Informations du compte
+                            </h6>
+                            <ul class="mb-0 small text-brown">
+                                <li>Type de compte : <strong>Personnel</strong></li>
+                                <li>Membre depuis : <strong>{{ request.user.date_joined|date:"d/m/Y" }}</strong></li>
+                                <li>Dernière connexion : <strong>
+                                    {% if request.user.last_login %}
+                                        {{ request.user.last_login|date:"d/m/Y à H:i" }}
+                                    {% else %}
+                                        Première connexion
+                                    {% endif %}
+                                </strong></li>
+                            </ul>
+                        </div>
+
+                        <!-- Bouton de soumission -->
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" name="save_info" class="btn btn-orange">
+                                <i class="fas fa-save me-2"></i>
+                                <strong>Enregistrer le téléphone</strong>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite : Changer le mot de passe -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-brown text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lock me-2"></i>
+                        <strong>Changer mon mot de passe</strong>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Mot de passe actuel -->
+                        <div class="mb-3">
+                            <label for="{{ password_form.old_password.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ password_form.old_password.label }}
+                            </label>
+                            <div class="position-relative">
+                                {{ password_form.old_password }}
+                                <button type="button" class="btn-eye" onclick="togglePassword('{{ password_form.old_password.id_for_label }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if password_form.old_password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ password_form.old_password.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nouveau mot de passe -->
+                        <div class="mb-3">
+                            <label for="{{ password_form.new_password1.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ password_form.new_password1.label }}
+                            </label>
+                            <div class="position-relative">
+                                {{ password_form.new_password1 }}
+                                <button type="button" class="btn-eye" onclick="togglePassword('{{ password_form.new_password1.id_for_label }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                Le mot de passe doit contenir exactement 6 chiffres.
+                            </small>
+                            {% if password_form.new_password1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ password_form.new_password1.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Confirmer le mot de passe -->
+                        <div class="mb-3">
+                            <label for="{{ password_form.new_password2.id_for_label }}" class="form-label text-brown fw-bold">
+                                {{ password_form.new_password2.label }}
+                            </label>
+                            <div class="position-relative">
+                                {{ password_form.new_password2 }}
+                                <button type="button" class="btn-eye" onclick="togglePassword('{{ password_form.new_password2.id_for_label }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if password_form.new_password2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ password_form.new_password2.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Conseils de sécurité -->
+                        <div class="alert alert-warning bg-light border-warning mb-3">
+                            <h6 class="text-brown fw-bold mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Important
+                            </h6>
+                            <p class="mb-2 small">Il est recommandé de changer le mot de passe temporaire fourni par votre gérant.</p>
+                            <ul class="mb-0 small text-brown">
+                                <li>Utilisez un code à 6 chiffres unique</li>
+                                <li>Évitez les dates de naissance</li>
+                                <li>Ne partagez jamais votre code</li>
+                            </ul>
+                        </div>
+
+                        <!-- Bouton de soumission -->
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" name="change_password" class="btn btn-orange">
+                                <i class="fas fa-key me-2"></i>
+                                <strong>Changer le mot de passe</strong>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+
+<style>
+/* Styles personnalisés */
+.card-header.bg-brown {
+    background-color: var(--color-brown) !important;
+}
+
+.btn-orange {
+    background-color: var(--color-orange) !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.btn-orange:hover {
+    background-color: var(--color-dark-orange) !important;
+    transform: translateY(-2px);
+}
+
+.text-brown {
+    color: var(--color-brown) !important;
+}
+
+.bg-beige {
+    background-color: var(--color-beige) !important;
+}
+
+.form-control:focus {
+    border-color: var(--color-orange);
+    box-shadow: 0 0 0 0.2rem rgba(216, 107, 30, 0.25);
+}
+
+.position-relative {
+    position: relative;
+}
+
+.btn-eye {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: var(--color-brown);
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 10;
+}
+
+.btn-eye:hover {
+    color: var(--color-orange);
+}
+</style>
+{% endblock %}
